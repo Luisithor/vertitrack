@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600&display=swap');
+
+:root {
+  --negro-carbon: #121212;
+  --negro-suave: #1A1A1A;
+  --amarillo-ocre: #CC7722;
+  --rojo-barro: #8B4513;
+  --blanco-humo: #F5F5F5;
+  --gris-tecnico: #4A4A4A;
+}
+
+.login-wrapper {
+  background-color: var(--negro-carbon);
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+.image-side {
+  background-image: url('https://images.unsplash.com/photo-1516216628859-9bccecab13ca?q=80&w=2069&auto=format&fit=crop'); 
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(40%) contrast(110%);
+}
+
+.overlay {
+  background: linear-gradient(
+    to right,
+    rgba(18, 18, 18, 0.9) 0%,
+    rgba(18, 18, 18, 0.4) 100%
+  );
+  height: 100%;
+}
+
+.brand-font-serif {
+  font-family: 'Playfair Display', serif;
+}
+
+.text-ocre {
+  color: var(--amarillo-ocre) !important;
+}
+
+.philosophy-line {
+  border-left: 2px solid var(--amarillo-ocre);
+  padding-left: 15px;
+}
+
+.bg-carbon {
+  background-color: var(--negro-carbon);
+}
+
+.ritual-logo-mark {
+  width: 50px;
+  height: 50px;
+  border: 2px solid var(--amarillo-ocre);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%); /* Efecto rasgado leve */
+}
+
+.custom-input-group {
+  display: flex;
+  align-items: center;
+  background: var(--negro-suave);
+  border: 1px solid var(--gris-tecnico);
+  border-radius: 4px;
+  padding: 5px 15px;
+  transition: all 0.3s ease;
+}
+
+.custom-input-group.focused {
+  border-color: var(--amarillo-ocre);
+  box-shadow: 0 0 8px rgba(204, 119, 34, 0.2);
+}
+
+.input-icon {
+  color: var(--gris-tecnico);
+  margin-right: 12px;
+}
+
+.custom-input-group.focused .input-icon {
+  color: var(--amarillo-ocre);
+}
+
+.custom-input-group input {
+  border: none !important;
+  box-shadow: none !important;
+  color: white !important;
+  padding: 10px 5px;
+}
+
+.custom-input-group input::placeholder {
+  color: var(--gris-tecnico);
+}
+
+.btn-ritual-primary {
+  background-color: var(--amarillo-ocre);
+  color: var(--negro-carbon);
+  border: none;
+  border-radius: 2px;
+  letter-spacing: 2px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-ritual-primary:hover {
+  background-color: #e68a2e;
+  color: var(--negro-carbon);
+}
+
+.btn-ritual-primary:disabled {
+  background-color: var(--gris-tecnico);
+  opacity: 0.6;
+}
+
+.password-toggle {
+  background: none;
+  border: none;
+  color: var(--gris-tecnico);
+  cursor: pointer;
+  padding: 0;
+}
+
+.password-toggle:hover {
+  color: var(--blanco-humo);
+}
+
+.custom-check .form-check-input {
+  background-color: var(--negro-suave);
+  border-color: var(--gris-tecnico);
+}
+
+.custom-check .form-check-input:checked {
+  background-color: var(--amarillo-ocre);
+  border-color: var(--amarillo-ocre);
+}
+
+.custom-alert {
+  background-color: rgba(139, 69, 19, 0.2);
+  border: 1px solid var(--rojo-barro);
+  color: #ff9b9b;
+  border-radius: 0;
+}
