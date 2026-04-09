@@ -1,23 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import {
-  Container,
-  Row,
-  Col,
-  Form,
-  Button,
-  Alert,
-  Spinner,
-} from "react-bootstrap";
-import { 
-  Person, 
-  Lock, 
-  Eye, 
-  EyeSlash, 
-  Tools, 
-  Building 
-} from "react-bootstrap-icons";
+import { Container, Row, Col, Form, Alert, Spinner } from "react-bootstrap";
+import { Person, Lock, Eye, EyeSlash } from "react-bootstrap-icons";
 import { motion } from "framer-motion";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../static/Login.css";
@@ -35,133 +20,94 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
-    if (!usuario.trim()) {
-      setError("El usuario es obligatorio");
-      return;
-    }
-
-    if (!contrasena) {
-      setError("La contraseña es obligatoria");
+    if (!usuario.trim() || !contrasena) {
+      setError("Por favor, complete todos los campos");
       return;
     }
 
     try {
       setLoading(true);
-
       const response = await axios.post(
         "https://vertitrack-backend.onrender.com/api/auth/login",
-        { usuario: usuario.trim(), contrasena },
+        { usuario: usuario.trim(), contrasena }
       );
-
       const { token, rol, id_usuario, nombre } = response.data;
-
+      
       localStorage.setItem("token", token);
       localStorage.setItem("rol", rol);
       localStorage.setItem("id_usuario", id_usuario);
       if (nombre) localStorage.setItem("nombre_usuario", nombre);
-
+      
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-      const rutas = {
-        admin: "/clientes",
-        tecnico: "/req-tecnicos",
-      };
-
+      
+      const rutas = { admin: "/clientes", tecnico: "/req-tecnicos" };
       navigate(rutas[rol] || "/");
     } catch (err) {
-      if (err.response?.status === 401) {
-        setError("Credenciales incorrectas");
-      } else if (!err.response) {
-        setError("Error de conexión con el servidor");
-      } else {
-        setError("Error interno. Intente más tarde");
-      }
+      setError(err.response?.status === 401 ? "Credenciales incorrectas" : "Error de conexión");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Container fluid className="p-0 login-wrapper bg-carbon">
+    <Container fluid className="p-0 login-wrapper">
       <Row className="g-0 min-vh-100">
-        <Col lg={6} className="d-none d-lg-block position-relative overflow-hidden">
-          <div className="image-side h-100">
-            <div className="overlay d-flex flex-column justify-content-center p-5">
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
-              >
-                <h1 className="display-2 brand-font-serif text-ocre mb-2">Vertitrack</h1>
-                <div className="philosophy-line mb-4">
-                  <span className="text-white small tracking-widest">
-                    ENGINEERED FOR EVERY LANDSCAPE
-                  </span>
-                </div>
-                
-                <div className="features-list mt-5">
-                  <div className="feature-item d-flex align-items-center mb-3">
-                    <Building className="text-ocre me-3" size={20} />
-                    <span className="text-white-50">Centralización de equipos y ubicaciones</span>
-                  </div>
-                  <div className="feature-item d-flex align-items-center mb-3">
-                    <Tools className="text-ocre me-3" size={20} />
-                    <span className="text-white-50">Gestión de fallas y órdenes de trabajo</span>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
+        {/* Panel Izquierdo: Imagen con atmósfera de Ingeniería */}
+        <Col lg={7} className="d-none d-lg-block position-relative overflow-hidden">
+          <div className="image-side h-100 d-flex align-items-end p-5">
+            <div className="overlay-navy"></div>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              className="position-relative z-index-10"
+            >
+              <div className="tracking-widest text-steel mb-2 uppercase">System Version 2026</div>
+              <h1 className="display-1 brand-font-serif text-white mb-0">Vertitrack</h1>
+              <div className="philosophy-line-steel">
+                <p className="tracking-widest text-white-50 mb-0">ENGINEERED FOR EVERY LANDSCAPE</p>
+              </div>
+            </motion.div>
           </div>
         </Col>
 
-        <Col lg={6} className="d-flex align-items-center justify-content-center">
+        {/* Panel Derecho: El Ritual de Acceso */}
+        <Col lg={5} className="d-flex align-items-center justify-content-center bg-navy-dark">
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="form-container p-4 p-xl-5 w-100"
-            style={{ maxWidth: "450px" }}
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            className="form-container p-4 p-xl-5 w-100" 
+            style={{ maxWidth: "420px" }}
           >
-            <div className="text-center mb-5">
-              <div className="ritual-logo-mark mb-3 mx-auto">
-                <span className="text-ocre fw-bold">V</span>
-              </div>
-              <h2 className="text-white brand-font-serif">Acceso al Sistema</h2>
-              <p className="text-muted small">Gestión Operativa de Elevadores 2026 </p>
+            <div className="text-start mb-5">
+              <div className="ritual-logo-mark-navy"><span>V</span></div>
+              <h2 className="text-white h4 brand-font-serif">Acceso al Sistema</h2>
+              <p className="text-steel-muted x-small uppercase tracking-widest">Autenticación de Terminal</p>
             </div>
 
-            {error && (
-              <Alert variant="danger" className="custom-alert mb-4" dismissible onClose={() => setError("")}>
-                {error}
-              </Alert>
-            )}
+            {error && <Alert variant="danger" className="custom-alert-navy mb-4">{error}</Alert>}
 
             <Form onSubmit={handleSubmit} className="ritual-form">
-              <Form.Group className="mb-4" controlId="usuario">
-                <Form.Label className="text-ocre small fw-bold">ID DE USUARIO</Form.Label>
-                <div className={`custom-input-group ${focusedField === "usuario" ? "focused" : ""}`}>
-                  <span className="input-icon">
-                    <Person size={20} />
-                  </span>
+              <Form.Group className="mb-4">
+                <Form.Label className="label-technical-navy">IDENTIFICACIÓN / USUARIO</Form.Label>
+                <div className={`custom-input-group-navy ${focusedField === "usuario" ? "focused" : ""}`}>
+                  <span className="input-icon"><Person size={18} /></span>
                   <Form.Control
                     type="text"
-                    placeholder="Ingresa tu usuario"
+                    placeholder="Ingrese su ID técnico"
                     value={usuario}
                     onChange={(e) => setUsuario(e.target.value)}
                     onFocus={() => setFocusedField("usuario")}
                     onBlur={() => setFocusedField(null)}
                     disabled={loading}
-                    className="bg-transparent text-white"
+                    className="input-transparent"
                   />
                 </div>
               </Form.Group>
 
-              <Form.Group className="mb-4" controlId="contrasena">
-                <Form.Label className="text-ocre small fw-bold">CONTRASEÑA</Form.Label>
-                <div className={`custom-input-group ${focusedField === "password" ? "focused" : ""}`}>
-                  <span className="input-icon">
-                    <Lock size={20} />
-                  </span>
+              <Form.Group className="mb-4">
+                <Form.Label className="label-technical-navy">CÓDIGO DE SEGURIDAD</Form.Label>
+                <div className={`custom-input-group-navy ${focusedField === "password" ? "focused" : ""}`}>
+                  <span className="input-icon"><Lock size={18} /></span>
                   <Form.Control
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
@@ -170,41 +116,33 @@ const Login = () => {
                     onFocus={() => setFocusedField("password")}
                     onBlur={() => setFocusedField(null)}
                     disabled={loading}
-                    className="bg-transparent text-white"
+                    className="input-transparent"
                   />
-                  <button
-                    type="button"
-                    className="password-toggle"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeSlash /> : <Eye />}
+                  <button type="button" className="password-toggle-navy" onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <EyeSlash size={18}/> : <Eye size={18}/>}
                   </button>
                 </div>
               </Form.Group>
 
-              <div className="d-flex justify-content-between align-items-center mb-5">
-                <Form.Check
-                  type="checkbox"
-                  id="remember"
-                  label={<small className="text-muted">Recordar sesión</small>}
-                  className="custom-check"
+              <div className="d-flex justify-content-between align-items-center mb-5 mt-2">
+                <Form.Check 
+                  type="checkbox" 
+                  id="remember" 
+                  label={<span className="x-small text-steel-muted uppercase">Mantener Conexión</span>} 
+                  className="custom-check-navy"
                 />
-                <a href="/register" className="text-ocre small text-decoration-none">¿No tienes acceso? Registrate</a>
+                <a href="/register" className="x-small text-steel text-decoration-none hover-underline">SOLICITAR ACCESO</a>
               </div>
 
               <motion.button
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98, y: 2 }}
+                whileHover={{ backgroundColor: "var(--v-blue)", color: "#ffffff" }}
+                whileTap={{ scale: 0.98 }}
                 type="submit"
-                className="btn-ritual-primary w-100 py-3 fw-bold"
+                className="btn-v-outline w-100"
                 disabled={loading}
               >
-                {loading ? <Spinner size="sm" /> : "INICIAR JORNADA"}
+                {loading ? <Spinner size="sm" animation="border" /> : "INICIAR SESIÓN"}
               </motion.button>
-
-              <p className="text-center mt-5 small text-muted">
-                Vertitrack Operaciones Técnicas © 2026 
-              </p>
             </Form>
           </motion.div>
         </Col>

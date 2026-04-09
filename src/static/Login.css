@@ -1,144 +1,127 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600&display=swap');
 
 :root {
-  --negro-carbon: #121212;
-  --negro-suave: #1A1A1A;
-  --amarillo-ocre: #CC7722;
-  --rojo-barro: #8B4513;
-  --blanco-humo: #F5F5F5;
-  --gris-tecnico: #4A4A4A;
+  --v-navy-dark: #0a1128; /* Profundidad técnica */
+  --v-blue: #1e3a8a;
+  --v-steel: #94a3b8;
+  --v-steel-muted: #475569;
+  --v-white: #f8fafc;
+  --font-serif: 'Playfair Display', serif;
 }
 
 .login-wrapper {
-  background-color: var(--negro-carbon);
+  background-color: var(--v-navy-dark);
   font-family: 'Inter', sans-serif;
-  overflow-x: hidden;
+  color: var(--v-white);
 }
 
+/* Panel Visual con atmósfera Navy */
 .image-side {
   background-image: url('https://images.unsplash.com/photo-1516216628859-9bccecab13ca?q=80&w=2069&auto=format&fit=crop'); 
   background-size: cover;
   background-position: center;
-  filter: grayscale(40%) contrast(110%);
+  filter: grayscale(30%) brightness(0.8);
 }
 
-.overlay {
-  background: linear-gradient(
-    to right,
-    rgba(18, 18, 18, 0.9) 0%,
-    rgba(18, 18, 18, 0.4) 100%
-  );
-  height: 100%;
+.overlay-navy {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(to right, var(--v-navy-dark) 0%, rgba(10, 17, 40, 0.6) 100%);
 }
 
-.brand-font-serif {
-  font-family: 'Playfair Display', serif;
+.philosophy-line-steel {
+  border-left: 1px solid var(--v-steel);
+  padding-left: 20px;
+  margin-top: 10px;
 }
 
-.text-ocre {
-  color: var(--amarillo-ocre) !important;
-}
-
-.philosophy-line {
-  border-left: 2px solid var(--amarillo-ocre);
-  padding-left: 15px;
-}
-
-.bg-carbon {
-  background-color: var(--negro-carbon);
-}
-
-.ritual-logo-mark {
+/* Elementos Ritualistas en Azul */
+.ritual-logo-mark-navy {
   width: 50px;
   height: 50px;
-  border: 2px solid var(--amarillo-ocre);
+  border: 1px solid var(--v-steel);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-serif);
   font-size: 1.5rem;
-  clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%); /* Efecto rasgado leve */
+  color: var(--v-white);
+  transform: rotate(45deg);
+  margin-bottom: 2.5rem;
 }
 
-.custom-input-group {
+.ritual-logo-mark-navy span {
+  transform: rotate(-45deg);
+}
+
+/* Formulario Honesto */
+.bg-navy-dark { background-color: var(--v-navy-dark); }
+
+.label-technical-navy {
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  color: var(--v-steel-muted);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.custom-input-group-navy {
   display: flex;
   align-items: center;
-  background: var(--negro-suave);
-  border: 1px solid var(--gris-tecnico);
-  border-radius: 4px;
-  padding: 5px 15px;
+  border-bottom: 1px solid var(--v-steel-muted);
+  transition: all 0.4s ease;
+  padding: 5px 0;
+}
+
+.custom-input-group-navy.focused {
+  border-bottom-color: var(--v-white);
+}
+
+.input-transparent {
+  background: transparent !important;
+  border: none !important;
+  color: white !important;
+  box-shadow: none !important;
+  padding-left: 10px !important;
+}
+
+.input-icon { color: var(--v-steel-muted); }
+.custom-input-group-navy.focused .input-icon { color: var(--v-white); }
+
+/* Botón Outline de Ingeniería */
+.btn-v-outline {
+  background: transparent;
+  color: var(--v-white);
+  border: 1px solid var(--v-steel-muted);
+  border-radius: 0;
+  padding: 16px;
+  letter-spacing: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
   transition: all 0.3s ease;
 }
 
-.custom-input-group.focused {
-  border-color: var(--amarillo-ocre);
-  box-shadow: 0 0 8px rgba(204, 119, 34, 0.2);
+.btn-v-outline:hover {
+  border-color: var(--v-white);
+  background: rgba(255,255,255,0.05);
 }
 
-.input-icon {
-  color: var(--gris-tecnico);
-  margin-right: 12px;
-}
-
-.custom-input-group.focused .input-icon {
-  color: var(--amarillo-ocre);
-}
-
-.custom-input-group input {
-  border: none !important;
-  box-shadow: none !important;
-  color: white !important;
-  padding: 10px 5px;
-}
-
-.custom-input-group input::placeholder {
-  color: var(--gris-tecnico);
-}
-
-.btn-ritual-primary {
-  background-color: var(--amarillo-ocre);
-  color: var(--negro-carbon);
-  border: none;
-  border-radius: 2px;
-  letter-spacing: 2px;
-  transition: background-color 0.3s ease;
-}
-
-.btn-ritual-primary:hover {
-  background-color: #e68a2e;
-  color: var(--negro-carbon);
-}
-
-.btn-ritual-primary:disabled {
-  background-color: var(--gris-tecnico);
-  opacity: 0.6;
-}
-
-.password-toggle {
+.password-toggle-navy {
   background: none;
   border: none;
-  color: var(--gris-tecnico);
-  cursor: pointer;
-  padding: 0;
+  color: var(--v-steel-muted);
 }
 
-.password-toggle:hover {
-  color: var(--blanco-humo);
-}
-
-.custom-check .form-check-input {
-  background-color: var(--negro-suave);
-  border-color: var(--gris-tecnico);
-}
-
-.custom-check .form-check-input:checked {
-  background-color: var(--amarillo-ocre);
-  border-color: var(--amarillo-ocre);
-}
-
-.custom-alert {
-  background-color: rgba(139, 69, 19, 0.2);
-  border: 1px solid var(--rojo-barro);
-  color: #ff9b9b;
+.custom-alert-navy {
+  background-color: transparent;
+  border: 1px solid #7f1d1d;
+  color: #fca5a5;
   border-radius: 0;
+  font-size: 0.8rem;
 }
+
+.text-steel { color: var(--v-steel) !important; }
+.text-steel-muted { color: var(--v-steel-muted) !important; }
+.tracking-widest { letter-spacing: 4px; }
+.brand-font-serif { font-family: var(--font-serif); }
