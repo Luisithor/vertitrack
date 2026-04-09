@@ -28,7 +28,7 @@ const Register = () => {
     nombre: "",
     apellido_paterno: "",
     apellido_materno: "",
-    fecha_nacimiento: "", // Campo sincronizado con la BD 
+    fecha_nacimiento: "", 
     usuario: "",
     correo: "",
     telefono: "",
@@ -50,7 +50,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await axios.post("http://localhost:3000/api/usuarios/crear", formData);
+      await axios.post("https://vertitrack-backend.onrender.com/api/usuarios/crear", formData);
       navigate("/"); 
     } catch (err) {
       setError(err.response?.data?.error || "Error al dar de alta en el sistema");
@@ -62,7 +62,6 @@ const Register = () => {
   return (
     <Container fluid className="p-0 login-wrapper bg-carbon">
       <Row className="g-0 min-vh-100">
-        {/* PANEL IZQUIERDO: IDENTIDAD RITUAL */}
         <Col lg={5} className="d-none d-lg-block position-relative overflow-hidden">
           <div className="image-side h-100">
             <div className="overlay d-flex flex-column justify-content-center p-5">
@@ -85,7 +84,6 @@ const Register = () => {
           </div>
         </Col>
 
-        {/* PANEL DERECHO: FORMULARIO TÉCNICO */}
         <Col lg={7} className="d-flex align-items-center justify-content-center py-5">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -108,7 +106,6 @@ const Register = () => {
             {error && <Alert variant="danger" className="custom-alert mb-4">{error}</Alert>}
 
             <Form onSubmit={handleSubmit} className="ritual-form">
-              {/* SECCIÓN: DATOS PERSONALES */}
               <Row className="mb-3">
                 <Col md={4}>
                   <Form.Group>
@@ -156,7 +153,6 @@ const Register = () => {
                 </Col>
               </Row>
 
-              {/* SECCIÓN: CONTACTO Y FECHA */}
               <Row className="mb-3">
                 <Col md={4}>
                   <Form.Group>
@@ -209,7 +205,6 @@ const Register = () => {
                 </Col>
               </Row>
 
-              {/* SECCIÓN: CREDENCIALES */}
               <Row className="mb-4">
                 <Col md={6}>
                   <Form.Group>

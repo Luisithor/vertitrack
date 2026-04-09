@@ -7,13 +7,13 @@ const PageAnimation = () => {
   return (
     <AnimatePresence mode="wait">
       <motion.div
-        key={location.pathname} // CLAVE: Esto obliga a re-animar al cambiar de ruta
+        key={location.pathname} 
         initial={{ opacity: 0, x: 10 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -10 }}
         transition={{ duration: 0.2 }}
       >
-        <Outlet /> {/* Aquí es donde se renderizarán tus páginas (Elevadores, Fallas, etc.) */}
+        <Outlet /> 
       </motion.div>
     </AnimatePresence>
   );

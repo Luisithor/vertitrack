@@ -11,7 +11,6 @@ const MantenimientoList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   
-  // Estados para el Modal de Detalle
   const [selectedMaint, setSelectedMaint] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -21,8 +20,7 @@ const MantenimientoList = () => {
 
   const fetchMantenimientos = async () => {
     try {
-      // Asegúrate de que esta ruta en el backend haga el JOIN con la tabla Usuarios
-      const res = await fetch("http://localhost:3000/api/mantenimientos/lista");
+      const res = await fetch("https://vertitrack-backend.onrender.com/api/mantenimientos/lista");
       const data = await res.json();
       setMantenimientos(data);
     } catch (error) {
@@ -54,7 +52,6 @@ const MantenimientoList = () => {
           </div>
         </div>
 
-        {/* Buscador */}
         <div className="card border-0 shadow-sm mb-4">
           <div className="card-body">
             <div className="input-group">
@@ -72,7 +69,6 @@ const MantenimientoList = () => {
           </div>
         </div>
 
-        {/* Tabla */}
         <div className="card border-0 shadow-sm overflow-hidden">
           <div className="table-responsive">
             <table className="table table-hover align-middle mb-0">
@@ -134,7 +130,6 @@ const MantenimientoList = () => {
         </div>
       </div>
 
-      {/* MODAL DE DETALLE */}
       {showModal && selectedMaint && (
         <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered modal-lg">
@@ -147,7 +142,6 @@ const MantenimientoList = () => {
               </div>
               <div className="modal-body p-4">
                 <div className="row g-4">
-                  {/* Info Cliente */}
                   <div className="col-md-6">
                     <label className="text-muted small fw-bold text-uppercase">Cliente y Ubicación</label>
                     <div className="d-flex align-items-center gap-3 mt-1">
@@ -161,7 +155,6 @@ const MantenimientoList = () => {
                     </div>
                   </div>
 
-                  {/* Info Técnico */}
                   <div className="col-md-6">
                     <label className="text-muted small fw-bold text-uppercase">Personal Técnico</label>
                     <div className="d-flex align-items-center gap-3 mt-1">
@@ -177,7 +170,6 @@ const MantenimientoList = () => {
 
                   <hr className="my-2 opacity-10" />
 
-                  {/* Actividades */}
                   <div className="col-12">
                     <label className="text-muted small fw-bold text-uppercase d-block mb-2">Actividades Realizadas</label>
                     <div className="bg-light p-3 rounded border-start border-primary border-4">
@@ -185,7 +177,6 @@ const MantenimientoList = () => {
                     </div>
                   </div>
 
-                  {/* Piezas y Observaciones */}
                   <div className="col-md-6">
                     <label className="text-muted small fw-bold text-uppercase d-block mb-2">Piezas Reemplazadas</label>
                     <div className="p-3 border rounded h-100">

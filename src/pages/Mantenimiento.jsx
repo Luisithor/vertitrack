@@ -6,7 +6,6 @@ import {
 } from "lucide-react";
 
 const Mantenimiento = () => {
-  // 1. RECUPERAR DATOS DEL USUARIO LOGUEADO
   const nombreUsuarioLogueado = localStorage.getItem("nombre_usuario") || "Usuario";
   const idUsuarioLogueado = localStorage.getItem("id_usuario");
 
@@ -24,7 +23,7 @@ const Mantenimiento = () => {
     actividades: "",
     piezas_reemplazadas: "",
     observaciones_tecnicas: "",
-    ot_responsable: nombreUsuarioLogueado, // Inicializado con el nombre logueado
+    ot_responsable: nombreUsuarioLogueado, 
     ot_fecha_limite: "",
     ot_subtotal: 0,
     ot_descripcion: ""
@@ -38,7 +37,7 @@ const Mantenimiento = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/mantenimientos/lista");
+      const res = await fetch("https://vertitrack-backend.onrender.com/api/mantenimientos/lista");
       const data = await res.json();
       setMantenimientos(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -51,7 +50,7 @@ const Mantenimiento = () => {
 
   const fetchElevadores = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/elevadores/lista");
+      const res = await fetch("https://vertitrack-backend.onrender.com/api/elevadores/lista");
       const data = await res.json();
       setElevadores(data);
     } catch (error) {
@@ -66,7 +65,7 @@ const Mantenimiento = () => {
       setFormData({
         ...maint,
         fecha_servicio: maint.fecha_servicio.split("T")[0],
-        ot_responsable: nombreUsuarioLogueado, // Siempre asegurar que sea el actual
+        ot_responsable: nombreUsuarioLogueado, 
         ot_fecha_limite: "",
         ot_subtotal: 0,
         ot_descripcion: ""
@@ -79,7 +78,7 @@ const Mantenimiento = () => {
         actividades: "",
         piezas_reemplazadas: "",
         observaciones_tecnicas: "",
-        ot_responsable: nombreUsuarioLogueado, // Auto-llenado
+        ot_responsable: nombreUsuarioLogueado, 
         ot_fecha_limite: "",
         ot_subtotal: 0,
         ot_descripcion: ""
@@ -98,15 +97,15 @@ const Mantenimiento = () => {
 
     const payload = {
       ...formData,
-      id_usuario: idUsuarioLogueado, // ID para la tabla mantenimientos
+      id_usuario: idUsuarioLogueado,
       requiereOT,
       ot_iva: iva,
       ot_total: total
     };
 
     const url = currentMaint
-      ? `http://localhost:3000/api/mantenimientos/actualizar/${currentMaint.id_mantenimiento}`
-      : "http://localhost:3000/api/mantenimientos/crear";
+      ? `https://vertitrack-backend.onrender.com/api/mantenimientos/actualizar/${currentMaint.id_mantenimiento}`
+      : "https://vertitrack-backend.onrender.com/api/mantenimientos/crear";
 
     try {
       await fetch(url, {
@@ -126,7 +125,7 @@ const Mantenimiento = () => {
   const handleDelete = async (id) => {
     if (window.confirm("¿Deseas eliminar este registro?")) {
       try {
-        await fetch(`http://localhost:3000/api/mantenimientos/eliminar/${id}`, { method: "DELETE" });
+        await fetch(`https://vertitrack-backend.onrender.com/api/mantenimientos/eliminar/${id}`, { method: "DELETE" });
         fetchData();
       } catch (error) {
         console.error("Error al eliminar:", error);
@@ -144,7 +143,6 @@ const Mantenimiento = () => {
   return (
     <LayoutPublic rol="admin">
       <div className="container-fluid px-4 py-4">
-        {/* ... Header y Buscador se mantienen igual ... */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <div>
             <h4 className="fw-bold mb-0">Bitácora de Servicios</h4>
@@ -216,7 +214,6 @@ const Mantenimiento = () => {
                 <form onSubmit={handleSubmit}>
                   <div className="modal-body">
                     <div className="row g-3 mb-4">
-                      {/* Datos del mantenimiento se mantienen igual... */}
                       <div className="col-md-6">
                         <label className="form-label small fw-bold">Elevador *</label>
                         <select className="form-select" required value={formData.id_elevador} 
@@ -249,7 +246,6 @@ const Mantenimiento = () => {
                       </div>
                     </div>
 
-                    {/* SECCIÓN ORDEN DE TRABAJO DINÁMICA */}
                     <div className={`p-4 rounded-3 border-start border-4 ${requiereOT ? 'bg-warning bg-opacity-10 border-warning' : 'bg-light border-secondary'}`}>
                       <div className="form-check form-switch d-flex align-items-center gap-3 mb-3">
                         <input className="form-check-input" type="checkbox" id="otSwitch" checked={requiereOT} onChange={(e) => setRequiereOT(e.target.checked)} />

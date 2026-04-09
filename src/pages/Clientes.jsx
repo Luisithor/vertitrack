@@ -22,7 +22,7 @@ const Clientes = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/clientes/lista");
+      const res = await fetch("https://vertitrack-backend.onrender.com/api/clientes/lista");
       const data = await res.json();
       setClientes(data);
     } catch (error) {
@@ -51,8 +51,8 @@ const Clientes = () => {
     e.preventDefault();
     setLoading(true);
     const url = currentCliente 
-      ? `http://localhost:3000/api/clientes/actualizar/${currentCliente.id_cliente}`
-      : "http://localhost:3000/api/clientes/crear";
+      ? `https://vertitrack-backend.onrender.com/api/clientes/actualizar/${currentCliente.id_cliente}`
+      : "https://vertitrack-backend.onrender.com/api/clientes/crear";
     
     try {
       await fetch(url, {
@@ -72,7 +72,7 @@ const Clientes = () => {
   const handleDelete = async (id) => {
     if (window.confirm("¿Estás seguro de eliminar este cliente? Se borrarán sus datos asociados.")) {
       try {
-        await fetch(`http://localhost:3000/api/clientes/eliminar/${id}`, { method: "DELETE" });
+        await fetch(`https://vertitrack-backend.onrender.com/api/clientes/eliminar/${id}`, { method: "DELETE" });
         fetchData();
       } catch (error) {
         console.error("Error al eliminar:", error);
@@ -87,7 +87,6 @@ const Clientes = () => {
   return (
     <LayoutPublic rol="admin">
       <div className="container-fluid px-4 py-4">
-        {/* Header Section */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <div>
             <h4 className="fw-bold mb-0">Gestión de Clientes</h4>
@@ -98,7 +97,6 @@ const Clientes = () => {
           </button>
         </div>
 
-        {/* Search Bar */}
         <div className="card border-0 shadow-sm mb-4">
           <div className="card-body">
             <div className="input-group">
@@ -116,7 +114,6 @@ const Clientes = () => {
           </div>
         </div>
 
-        {/* Clients Grid */}
         <div className="row g-4">
           {loading ? (
             <div className="text-center py-5"><div className="spinner-border text-primary" /></div>
@@ -150,7 +147,6 @@ const Clientes = () => {
           )}
         </div>
 
-        {/* Modal */}
         {isModalOpen && (
           <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
             <div className="modal-dialog modal-dialog-centered">

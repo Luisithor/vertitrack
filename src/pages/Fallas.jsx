@@ -35,7 +35,7 @@ const Fallas = () => {
   const fetchFallas = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/fallas/lista");
+      const res = await fetch("https://vertitrack-backend.onrender.com/api/fallas/lista");
       const data = await res.json();
       setFallas(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -47,7 +47,7 @@ const Fallas = () => {
 
   const fetchElevadores = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/elevadores/lista");
+      const res = await fetch("https://vertitrack-backend.onrender.com/api/elevadores/lista");
       const data = await res.json();
       setElevadores(data);
     } catch (error) {
@@ -84,8 +84,8 @@ const Fallas = () => {
     const payload = { ...formData, id_usuario: idUsuarioLogueado };
     try {
       const url = currentFalla
-        ? `http://localhost:3000/api/fallas/actualizar/${currentFalla.id_falla}`
-        : "http://localhost:3000/api/fallas/crear";
+        ? `https://vertitrack-backend.onrender.com/api/fallas/actualizar/${currentFalla.id_falla}`
+        : "https://vertitrack-backend.onrender.com/api/fallas/crear";
       await fetch(url, {
         method: currentFalla ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
@@ -168,7 +168,6 @@ const Fallas = () => {
           </div>
         </div>
 
-        {/* Stats */}
         <div className="row g-3 mb-4">
           {[
             { label: "Total", val: stats.total, color: "primary", icon: ClipboardList },
@@ -192,7 +191,6 @@ const Fallas = () => {
           ))}
         </div>
 
-        {/* Filtros */}
         <div className="card border-0 shadow-sm mb-4">
           <div className="card-body row g-3 align-items-center">
             <div className="col-md-4">
@@ -227,7 +225,6 @@ const Fallas = () => {
           </div>
         </div>
 
-        {/* Tabla */}
         <div className="card border-0 shadow-sm overflow-hidden">
           <div className="table-responsive">
             <table className="table table-hover align-middle mb-0">
@@ -299,7 +296,6 @@ const Fallas = () => {
           </div>
         </div>
 
-        {/* Modal */}
         {isModalOpen && (
           <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
             <div className="modal-dialog modal-lg modal-dialog-centered">

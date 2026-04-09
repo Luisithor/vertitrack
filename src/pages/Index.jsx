@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import LayoutPublic from '../layout/LayoutPublic';
-import PageAnimation from '../components/PageAnimation'; // Asegúrate de que la ruta sea correcta
+import PageAnimation from '../components/PageAnimation'; 
 import NotFound from './NotFound';
 import Login from './Login';
 import Register from './Register';
@@ -12,7 +12,7 @@ import Ordenes from './Orden';
 import Dashboard from './Dashboard';
 import Mantenimiento from './Mantenimiento';
 import MantenimientoList from './MantenimientoList';
-import ProtectedRoute from '../components/ProtectedRoute'; // Importa el guardián
+import ProtectedRoute from '../components/ProtectedRoute';
 
 export const router = createBrowserRouter([
   {

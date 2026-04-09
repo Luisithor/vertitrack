@@ -32,7 +32,7 @@ const Elevadores = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/elevadores");
+      const res = await fetch("https://vertitrack-backend.onrender.com/api/elevadores");
       const data = await res.json();
       setElevadores(data);
     } catch (error) {
@@ -44,7 +44,7 @@ const Elevadores = () => {
 
   const fetchClientes = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/clientes/lista");
+      const res = await fetch("https://vertitrack-backend.onrender.com/api/clientes/lista");
       const data = await res.json();
       setClientes(data);
     } catch (error) {
@@ -57,8 +57,8 @@ const Elevadores = () => {
     setLoading(true);
     try {
       const url = idCliente === ""
-          ? "http://localhost:3000/api/elevadores"
-          : `http://localhost:3000/api/elevadores/cliente/${idCliente}`;
+          ? "https://vertitrack-backend.onrender.com/api/elevadores"
+          : `https://vertitrack-backend.onrender.com/api/elevadores/cliente/${idCliente}`;
       const res = await fetch(url);
       const data = await res.json();
       setElevadores(data);
@@ -93,8 +93,8 @@ const Elevadores = () => {
     setLoading(true);
     try {
       const url = currentElevador
-        ? `http://localhost:3000/api/elevadores/actualizar/${currentElevador.id_elevador}`
-        : "http://localhost:3000/api/elevadores/crear";
+        ? `https://vertitrack-backend.onrender.com/api/elevadores/actualizar/${currentElevador.id_elevador}`
+        : "https://vertitrack-backend.onrender.com/api/elevadores/crear";
 
       const res = await fetch(url, {
         method: currentElevador ? "PUT" : "POST",
@@ -163,9 +163,7 @@ const Elevadores = () => {
           </button>
         </div>
 
-        {/* Stats Cards */}
         <div className="row g-3 mb-4">
-          {/* ... (Tus stats cards se mantienen igual, funcionan perfecto) ... */}
           <div className="col-md-3">
             <div className="card border-0 shadow-sm h-100">
               <div className="card-body d-flex align-items-center">
@@ -179,10 +177,8 @@ const Elevadores = () => {
               </div>
             </div>
           </div>
-          {/* (Se omiten las otras 3 stats por brevedad, pero mantenlas en tu código) */}
         </div>
 
-        {/* Buscador y Filtro */}
         <div className="card border-0 shadow-sm mb-4">
           <div className="card-body p-3">
             <div className="row g-3">
@@ -216,7 +212,6 @@ const Elevadores = () => {
           </div>
         </div>
 
-        {/* Grid de Elevadores */}
         <div className="row g-4">
           {loading ? (
             <div className="col-12 text-center py-5"><div className="spinner-border text-primary" /></div>
@@ -236,7 +231,6 @@ const Elevadores = () => {
                 <div className="col-md-6 col-lg-4 col-xl-3" key={el.id_elevador}>
                   <div className="card border-0 shadow-sm h-100 lift-card">
                     <div className="card-body">
-                      {/* Cabecera: Estatus y Acción */}
                       <div className="d-flex justify-content-between align-items-start mb-3">
                         <span className={`badge ${statusBadge.class} bg-opacity-10 text-${statusBadge.class.replace('bg-', '')} d-flex align-items-center gap-1 p-2`}>
                           <IconComponent size={14} /> {el.estatus_operativo}
@@ -246,7 +240,6 @@ const Elevadores = () => {
                         </button>
                       </div>
 
-                      {/* Info Principal: CLIENTE DESTACADO */}
                       <div className="mb-3">
                         <div className="d-flex align-items-center gap-2 mb-1">
                           <Building size={14} className="text-primary" />
@@ -274,7 +267,6 @@ const Elevadores = () => {
                         </div>
                       </div>
 
-                      {/* Footer de Tarjeta: Próximo Mantenimiento */}
                       <div className={`p-2 rounded-3 text-center small fw-bold ${mantStatus.class} bg-white border`}>
                         <Calendar size={14} className="me-2" />
                         Próximo: {mantStatus.text}
@@ -287,7 +279,6 @@ const Elevadores = () => {
           )}
         </div>
 
-        {/* Modal de Formulario */}
         {isModalOpen && (
           <div className="modal show d-block shadow" style={{ backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
             <div className="modal-dialog modal-lg modal-dialog-centered">
@@ -323,7 +314,6 @@ const Elevadores = () => {
                           required
                         />
                       </div>
-                      {/* ... resto de campos del formulario ... */}
                       <div className="col-md-4">
                         <label className="form-label small fw-bold text-muted" placeholder="Ej: Tracción, Hidráulico">TIPO</label>
                         <input className="form-control" value={formData.tipo_equipo} onChange={(e) => setFormData({ ...formData, tipo_equipo: e.target.value })} />

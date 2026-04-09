@@ -19,7 +19,6 @@ const Dashboard = () => {
     tiempoRespuesta: "0 min"
   });
 
-  // Lógica de cálculo que tenías en el otro componente
   const calcularProximoMantenimiento = (ultimaRevision, frecuencia) => {
     if (!ultimaRevision || !frecuencia) return null;
     const fecha = new Date(ultimaRevision);
@@ -36,8 +35,8 @@ const Dashboard = () => {
   const fetchData = async () => {
     try {
       const [resFallas, resElevadores] = await Promise.all([
-        fetch("http://localhost:3000/api/fallas/lista"),
-        fetch("http://localhost:3000/api/elevadores")
+        fetch("https://vertitrack-backend.onrender.com/api/fallas/lista"),
+        fetch("https://vertitrack-backend.onrender.com/api/elevadores")
       ]);
 
       const dataFallas = await resFallas.json();
@@ -138,10 +137,8 @@ const Dashboard = () => {
         </div>
       </section>
 
-      {/* Layout de dos columnas para Fallas y Mantenimientos */}
       <div className="main-content-grid">
         
-        {/* Columna Izquierda: Fallas (Tabla principal) */}
         <main className="table-container">
           <h3 className="section-title">INCIDENCIAS ACTIVAS</h3>
           <table>
@@ -166,7 +163,6 @@ const Dashboard = () => {
           </table>
         </main>
 
-        {/* Columna Derecha: Próximos Mantenimientos */}
         <aside className="maintenance-sidebar">
           <h3 className="section-title">MANTENIMIENTOS <span className="yellow-text">SEMANALES</span></h3>
           <div className="maint-list">

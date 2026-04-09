@@ -4,7 +4,7 @@ import { ClipboardList, Plus, Calendar, Settings, Package, CheckCircle2, Clock, 
 
 const Ordenes = () => {
   const [ordenes, setOrdenes] = useState([]);
-  const [fallas, setFallas] = useState([]); // Estado para la lista de fallas
+  const [fallas, setFallas] = useState([]); 
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentOrden, setCurrentOrden] = useState(null);
@@ -18,13 +18,13 @@ const Ordenes = () => {
 
   useEffect(() => {
     fetchData();
-    fetchFallas(); // Cargamos las fallas para tenerlas listas
+    fetchFallas(); 
   }, []);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/ordenes/lista");
+      const res = await fetch("https://vertitrack-backend.onrender.com/api/ordenes/lista");
       const data = await res.json();
       setOrdenes(data);
     } catch (error) {
@@ -36,9 +36,8 @@ const Ordenes = () => {
 
   const fetchFallas = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/fallas/lista");
+      const res = await fetch("https://vertitrack-backend.onrender.com/api/fallas/lista");
       const data = await res.json();
-      // Filtramos solo las que no tengan orden o estén activas (opcional)
       setFallas(data);
     } catch (error) {
       console.error("Error al cargar fallas:", error);
@@ -65,8 +64,8 @@ const Ordenes = () => {
     e.preventDefault();
     setLoading(true);
     const url = currentOrden 
-      ? `http://localhost:3000/api/ordenes/actualizar/${currentOrden.id_orden}`
-      : "http://localhost:3000/api/ordenes/crear";
+      ? `https://vertitrack-backend.onrender.com/api/ordenes/actualizar/${currentOrden.id_orden}`
+      : "https://vertitrack-backend.onrender.com/api/ordenes/crear";
     
     try {
       await fetch(url, {
@@ -96,7 +95,6 @@ const Ordenes = () => {
   return (
     <LayoutPublic rol="admin">
       <div className="container-fluid px-4 py-4">
-        {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <div>
             <h4 className="fw-bold mb-0">Órdenes de Trabajo</h4>
@@ -107,7 +105,6 @@ const Ordenes = () => {
           </button>
         </div>
 
-        {/* Lista de Órdenes */}
         <div className="row g-3">
           {loading ? (
             <div className="text-center py-5"><div className="spinner-border text-primary" /></div>
@@ -140,7 +137,6 @@ const Ordenes = () => {
           )}
         </div>
 
-        {/* Modal */}
         {isModalOpen && (
           <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}>
             <div className="modal-dialog modal-dialog-centered">
@@ -159,7 +155,7 @@ const Ordenes = () => {
                           <select 
                             className="form-select" 
                             required 
-                            disabled={!!currentOrden} // No se puede cambiar la falla una vez creada la orden
+                            disabled={!!currentOrden} 
                             value={formData.id_falla}
                             onChange={(e) => setFormData({...formData, id_falla: e.target.value})}
                           >
