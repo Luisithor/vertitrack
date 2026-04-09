@@ -24,6 +24,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../static/Login.css";
 
 const Register = () => {
+  // El rol se predefine aquí para que sea honesto con la función del Gremio
   const [formData, setFormData] = useState({
     nombre: "",
     apellido_paterno: "",
@@ -32,7 +33,8 @@ const Register = () => {
     usuario: "",
     correo: "",
     telefono: "",
-    contrasena: ""
+    contrasena: "",
+    rol: "tecnico" // Definición automática del rol
   });
 
   const [error, setError] = useState("");
@@ -50,6 +52,7 @@ const Register = () => {
     setLoading(true);
 
     try {
+      // Al enviar formData, ya incluye el rol "tecnico" por defecto
       await axios.post("https://vertitrack-backend.onrender.com/api/usuarios/crear", formData);
       navigate("/"); 
     } catch (err) {
@@ -62,6 +65,7 @@ const Register = () => {
   return (
     <Container fluid className="p-0 login-wrapper bg-carbon">
       <Row className="g-0 min-vh-100">
+        {/* Lado del Ritual: Filosofía y Herencia */}
         <Col lg={5} className="d-none d-lg-block position-relative overflow-hidden">
           <div className="image-side h-100">
             <div className="overlay d-flex flex-column justify-content-center p-5">
@@ -73,10 +77,10 @@ const Register = () => {
                 <h1 className="display-3 brand-font-serif text-ocre mb-2">Gremio Vertitrack</h1>
                 <div className="philosophy-line mb-4">
                   <span className="text-white small tracking-widest uppercase">
-                    Engineered for every landscape [cite: 1]
+                    Engineered for every landscape
                   </span>
                 </div>
-                <p className="text-white-50 mt-4">
+                <p className="text-white-50 mt-4 fst-italic">
                   "La tecnología como respeto digital e inclusión operativa."
                 </p>
               </motion.div>
@@ -84,6 +88,7 @@ const Register = () => {
           </div>
         </Col>
 
+        {/* Lado del Code: Implementación técnica */}
         <Col lg={7} className="d-flex align-items-center justify-content-center py-5">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -99,11 +104,15 @@ const Register = () => {
               >
                 <ArrowLeft className="me-2" /> VOLVER AL ACCESO
               </Button>
-              <h2 className="text-white brand-font-serif">Alta de Personal</h2>
-              <p className="text-muted small">Registro en la base de datos operativa 2026 [cite: 2]</p>
+              <h2 className="text-white brand-font-serif">Alta de Personal Técnico</h2>
+              <p className="text-muted small uppercase tracking-widest">Base de datos operativa — 2026</p>
             </div>
 
-            {error && <Alert variant="danger" className="custom-alert mb-4">{error}</Alert>}
+            {error && (
+              <Alert variant="danger" className="custom-alert mb-4 border-0 rounded-0">
+                {error}
+              </Alert>
+            )}
 
             <Form onSubmit={handleSubmit} className="ritual-form">
               <Row className="mb-3">
@@ -117,7 +126,7 @@ const Register = () => {
                         onChange={handleChange}
                         onFocus={() => setFocusedField("nombre")}
                         onBlur={() => setFocusedField(null)}
-                        className="bg-transparent text-white"
+                        className="bg-transparent text-white border-0 shadow-none"
                       />
                     </div>
                   </Form.Group>
@@ -132,7 +141,7 @@ const Register = () => {
                         onChange={handleChange}
                         onFocus={() => setFocusedField("paterno")}
                         onBlur={() => setFocusedField(null)}
-                        className="bg-transparent text-white"
+                        className="bg-transparent text-white border-0 shadow-none"
                       />
                     </div>
                   </Form.Group>
@@ -146,7 +155,7 @@ const Register = () => {
                         onChange={handleChange}
                         onFocus={() => setFocusedField("materno")}
                         onBlur={() => setFocusedField(null)}
-                        className="bg-transparent text-white"
+                        className="bg-transparent text-white border-0 shadow-none"
                       />
                     </div>
                   </Form.Group>
@@ -158,7 +167,7 @@ const Register = () => {
                   <Form.Group>
                     <Form.Label className="text-ocre small fw-bold">FECHA NACIMIENTO</Form.Label>
                     <div className={`custom-input-group ${focusedField === "fecha" ? "focused" : ""}`}>
-                      <span className="input-icon"><Calendar3 /></span>
+                      <span className="input-icon text-muted me-2"><Calendar3 /></span>
                       <Form.Control
                         type="date"
                         name="fecha_nacimiento"
@@ -166,7 +175,7 @@ const Register = () => {
                         onChange={handleChange}
                         onFocus={() => setFocusedField("fecha")}
                         onBlur={() => setFocusedField(null)}
-                        className="bg-transparent text-white"
+                        className="bg-transparent text-white border-0 shadow-none color-scheme-dark"
                       />
                     </div>
                   </Form.Group>
@@ -175,14 +184,15 @@ const Register = () => {
                   <Form.Group>
                     <Form.Label className="text-ocre small fw-bold">CORREO ELECTRÓNICO</Form.Label>
                     <div className={`custom-input-group ${focusedField === "correo" ? "focused" : ""}`}>
-                      <span className="input-icon"><Envelope /></span>
+                      <span className="input-icon text-muted me-2"><Envelope /></span>
                       <Form.Control
                         type="email"
                         name="correo"
+                        required
                         onChange={handleChange}
                         onFocus={() => setFocusedField("correo")}
                         onBlur={() => setFocusedField(null)}
-                        className="bg-transparent text-white"
+                        className="bg-transparent text-white border-0 shadow-none"
                       />
                     </div>
                   </Form.Group>
@@ -191,14 +201,15 @@ const Register = () => {
                   <Form.Group>
                     <Form.Label className="text-ocre small fw-bold">TELÉFONO</Form.Label>
                     <div className={`custom-input-group ${focusedField === "tel" ? "focused" : ""}`}>
-                      <span className="input-icon"><Telephone /></span>
+                      <span className="input-icon text-muted me-2"><Telephone /></span>
                       <Form.Control
                         type="number"
                         name="telefono"
+                        required
                         onChange={handleChange}
                         onFocus={() => setFocusedField("tel")}
                         onBlur={() => setFocusedField(null)}
-                        className="bg-transparent text-white"
+                        className="bg-transparent text-white border-0 shadow-none"
                       />
                     </div>
                   </Form.Group>
@@ -208,16 +219,16 @@ const Register = () => {
               <Row className="mb-4">
                 <Col md={6}>
                   <Form.Group>
-                    <Form.Label className="text-ocre small fw-bold">USUARIO</Form.Label>
+                    <Form.Label className="text-ocre small fw-bold">ID DE USUARIO (SISTEMA)</Form.Label>
                     <div className={`custom-input-group ${focusedField === "user" ? "focused" : ""}`}>
-                      <span className="input-icon"><PersonBadge /></span>
+                      <span className="input-icon text-muted me-2"><PersonBadge /></span>
                       <Form.Control
                         name="usuario"
                         required
                         onChange={handleChange}
                         onFocus={() => setFocusedField("user")}
                         onBlur={() => setFocusedField(null)}
-                        className="bg-transparent text-white"
+                        className="bg-transparent text-white border-0 shadow-none"
                       />
                     </div>
                   </Form.Group>
@@ -226,7 +237,7 @@ const Register = () => {
                   <Form.Group>
                     <Form.Label className="text-ocre small fw-bold">CONTRASEÑA</Form.Label>
                     <div className={`custom-input-group ${focusedField === "pass" ? "focused" : ""}`}>
-                      <span className="input-icon"><Lock /></span>
+                      <span className="input-icon text-muted me-2"><Lock /></span>
                       <Form.Control
                         type="password"
                         name="contrasena"
@@ -234,7 +245,7 @@ const Register = () => {
                         onChange={handleChange}
                         onFocus={() => setFocusedField("pass")}
                         onBlur={() => setFocusedField(null)}
-                        className="bg-transparent text-white"
+                        className="bg-transparent text-white border-0 shadow-none"
                       />
                     </div>
                   </Form.Group>
@@ -243,16 +254,16 @@ const Register = () => {
 
               <motion.button
                 whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98, y: 2 }}
+                whileTap={{ scale: 0.98 }}
                 type="submit"
                 className="btn-ritual-primary w-100 py-3 fw-bold mt-2"
                 disabled={loading}
               >
-                {loading ? <Spinner size="sm" /> : "DAR DE ALTA EN VERTITRACK"}
+                {loading ? <Spinner size="sm" animation="border" /> : "REGISTRAR EN EL GREMIO"}
               </motion.button>
 
-              <p className="text-center mt-4 small text-muted">
-                Este registro permitirá centralizar la información técnica y administrativa del personal operativo[cite: 11, 77].
+              <p className="text-center mt-4 x-small text-muted uppercase tracking-widest">
+                Este registro centraliza la información bajo el estándar Vertitrack Operaciones.
               </p>
             </Form>
           </motion.div>
