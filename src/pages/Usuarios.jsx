@@ -22,7 +22,7 @@ const Usuarios = () => {
     usuario: "",
     correo: "",
     telefono: "",
-    rol: "Tecnico",
+    rol: "tecnico",
     contrasena: "",
   });
 
@@ -62,7 +62,7 @@ const Usuarios = () => {
         usuario: "",
         correo: "",
         telefono: "",
-        rol: "Tecnico",
+        rol: "tecnico",
         contrasena: "",
       });
     }
@@ -193,7 +193,7 @@ const Usuarios = () => {
                       </td>
                       <td>
                         <span className={`badge rounded-pill ${
-                          u.rol === 'Admin' ? 'bg-danger-subtle text-danger' : 'bg-info-subtle text-info'
+                          u.rol === 'admin' ? 'bg-danger-subtle text-danger' : 'bg-info-subtle text-info'
                         } border-0 px-3`}>
                           {u.rol}
                         </span>
@@ -262,8 +262,8 @@ const Usuarios = () => {
                         onChange={(e) => setFormData({...formData, rol: e.target.value})}
                         required
                       >
-                        <option value="Admin">Administrador</option>
-                        <option value="Tecnico">Técnico Operativo</option>
+                        <option value="admin">Administrador</option>
+                        <option value="tecnico">Técnico Operativo</option>
                       </select>
                     </div>
 

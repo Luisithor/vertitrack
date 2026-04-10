@@ -6,7 +6,6 @@ import {
   ClipboardCheck, Menu, X 
 } from 'lucide-react';
 import { Paperclip } from 'react-bootstrap-icons';
-import { path } from 'framer-motion/client';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -41,14 +40,20 @@ const Sidebar = () => {
 
   const menuItems = [
     { path: '/dashboard', label: 'Inicio', icon: House },
-    { path: '/clientes', label: 'Clientes', icon: Users },
-    { path: '/elevadores', label: 'Elevadores', icon: Building2 },
-    { path: '/reporte-falla', label: 'Reportes de Fallas', icon: AlertTriangle },
-    { path: '/ordenes', label: 'Órdenes de Trabajo', icon: Paperclip },
-    { path: '/mantenimiento', label: 'Mantenimientos', icon: Wrench },
-    { path: '/historial-mantenimientos', label: 'Historial de Mantenimientos', icon: ClipboardCheck },
-    { path: '/usuarios', label: 'Usuarios', icon: Users },
+    { path: '/clientes', label: 'Clientes', icon: Users, roles: ['admin'] },
+    { path: '/elevadores', label: 'Elevadores', icon: Building2, roles: ['admin'] },
+    { path: '/reporte-falla', label: 'Reportes de Fallas', icon: AlertTriangle, roles: ['admin'] },
+    { path: '/ordenes', label: 'Órdenes de Trabajo', icon: Paperclip, roles: ['admin', 'tecnico'] },
+    { path: '/mantenimiento', label: 'Mantenimientos', icon: Wrench, roles: ['admin', 'tecnico'] },
+    { path: '/historial-mantenimientos', label: 'Historial de Mantenimientos', icon: ClipboardCheck, roles: ['admin', 'tecnico'] },
+    { path: '/usuarios', label: 'Usuarios', icon: Users, roles: ['admin'] },
   ];
+
+  const filteredMenuItems = menuItems.filter(item => {
+    if (!item.roles) return true;
+    if (userData.rol === 'admin') return true;
+    return item.roles.includes(userData.rol);
+  });
 
   return (
     <>
@@ -83,13 +88,13 @@ const Sidebar = () => {
 
         <nav className="flex-grow-1 px-3 py-4 overflow-auto">
           <ul className="nav nav-pills flex-column gap-2">
-            {menuItems.map((item) => {
+            {filteredMenuItems.map((item) => {
               const Icon = item.icon;
               return (
                 <li key={item.path} className="nav-item">
                   <NavLink
                     to={item.path}
-                    onClick={() => setIsOpen(false)} // Cerrar al navegar en móvil
+                    onClick={() => setIsOpen(false)}
                     className={({ isActive }) => 
                       `nav-link d-flex align-items-center gap-3 px-3 py-2 ${
                         isActive ? 'active bg-primary' : 'text-dark'
