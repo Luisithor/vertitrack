@@ -6,6 +6,7 @@ import {
   ClipboardCheck, Menu, X 
 } from 'lucide-react';
 import { Paperclip } from 'react-bootstrap-icons';
+import { path } from 'framer-motion/client';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ const Sidebar = () => {
     { path: '/ordenes', label: 'Órdenes de Trabajo', icon: Paperclip },
     { path: '/mantenimiento', label: 'Mantenimientos', icon: Wrench },
     { path: '/historial-mantenimientos', label: 'Historial de Mantenimientos', icon: ClipboardCheck },
+    { path: '/usuarios', label: 'Usuarios', icon: Users },
   ];
 
   return (

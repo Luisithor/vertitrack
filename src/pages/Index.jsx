@@ -13,6 +13,7 @@ import Dashboard from './Dashboard';
 import Mantenimiento from './Mantenimiento';
 import MantenimientoList from './MantenimientoList';
 import ProtectedRoute from '../components/ProtectedRoute';
+import Usuarios from './Usuarios';
 
 export const router = createBrowserRouter([
   {
@@ -61,6 +62,10 @@ export const router = createBrowserRouter([
               {
                 path: "/historial-mantenimientos",
                 element: <MantenimientoList />,
+              },
+              {
+                path: "Usuarios",
+                element: <Usuarios />,
               }
             ],
           },
