@@ -34,7 +34,7 @@ const Register = () => {
     correo: "",
     telefono: "",
     contrasena: "",
-    rol: "tecnico" // Definición automática del rol
+    rol: "tecnico"
   });
 
   const [error, setError] = useState("");

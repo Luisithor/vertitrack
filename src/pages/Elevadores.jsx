@@ -321,6 +321,7 @@ const Elevadores = () => {
                       <div className="col-md-4">
                         <label className="form-label small fw-bold text-muted">FRECUENCIA</label>
                         <select className="form-select" value={formData.frecuencia_mantenimiento} onChange={(e) => setFormData({ ...formData, frecuencia_mantenimiento: e.target.value })}>
+                          <option value="" disabled>Seleccione...</option>
                           <option value="Mensual">Mensual</option>
                           <option value="Bimestral">Bimestral</option>
                           <option value="Trimestral">Trimestral</option>
