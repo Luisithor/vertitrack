@@ -40,7 +40,7 @@ const Login = () => {
       
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       
-      const rutas = { admin: "/clientes", tecnico: "/req-tecnicos" };
+      const rutas = { admin: "/clientes", tecnico: "/mantenimiento" };
       navigate(rutas[rol] || "/");
     } catch (err) {
       setError(err.response?.status === 401 ? "Credenciales incorrectas" : "Error de conexión");
