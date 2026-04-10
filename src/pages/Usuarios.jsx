@@ -264,7 +264,6 @@ const Usuarios = () => {
                       >
                         <option value="Admin">Administrador</option>
                         <option value="Tecnico">Técnico Operativo</option>
-                        <option value="Cliente">Cliente Externo</option>
                       </select>
                     </div>
 
