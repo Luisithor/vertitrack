@@ -101,7 +101,7 @@ const Dashboard = () => {
       <header className="main-header">
         <div className="logo-section">
           <div className="client-badge">CONTROL PREVENTIVO Y CORRECTIVO</div>
-          <h1>VERTITRACK <span className="live-text">PRO</span></h1>
+          <h1>VERTITRACK <span className="live-text"></span></h1>
         </div>
         
         <div className="header-metrics">
