@@ -16,7 +16,6 @@ const Dashboard = () => {
     criticas: 0,
     total: 0,
     eficiencia: "0%",
-    tiempoRespuesta: "0 min"
   });
 
   const calcularProximoMantenimiento = (ultimaRevision, frecuencia) => {
@@ -42,47 +41,47 @@ const Dashboard = () => {
       const dataFallas = await resFallas.json();
       const dataElevadores = await resElevadores.json();
 
-      // Filtrar mantenimientos (Próximos 7 días o Vencidos)
       const hoy = new Date();
       const proxSieteDias = new Date();
       proxSieteDias.setDate(hoy.getDate() + 7);
 
-      const listaMantenimientos = dataElevadores.map(el => {
-        const fechaProx = calcularProximoMantenimiento(el.ultima_revision, el.frecuencia_mantenimiento);
-        return { ...el, fechaProx };
-      }).filter(el => {
-        if (!el.fechaProx) return false;
-        return el.fechaProx <= proxSieteDias; // Muestra vencidos y próximos a 7 días
-      }).sort((a, b) => a.fechaProx - b.fechaProx);
+      const listaMantenimientos = dataElevadores.map(el => ({
+        ...el,
+        fechaProx: calcularProximoMantenimiento(el.ultima_revision, el.frecuencia_mantenimiento)
+      })).filter(el => el.fechaProx && el.fechaProx <= proxSieteDias)
+         .sort((a, b) => a.fechaProx - b.fechaProx);
 
       const newCriticas = dataFallas.filter((f) => f.urgencia === "Crítica").length;
-      if (newCriticas > lastCriticosCount) audioAlert.current.play().catch(() => {});
+      
+      // Reproducir alerta solo si aumentan los críticos
+      setLastCriticosCount(prev => {
+        if (newCriticas > prev) audioAlert.current.play().catch(() => {});
+        return newCriticas;
+      });
 
       const atendidas = dataFallas.filter(f => f.estado_reporte !== "Pendiente").length;
       const eficienciaCalculada = dataFallas.length > 0 ? Math.round((atendidas / dataFallas.length) * 100) : 100;
 
       setFallas(dataFallas);
       setMantenimientos(listaMantenimientos);
-      setLastCriticosCount(newCriticas);
       setStats({
         pendientes: dataFallas.filter((f) => f.estado_reporte === "Pendiente").length,
         enProceso: dataFallas.filter((f) => f.estado_reporte === "En Proceso").length,
         criticas: newCriticas,
         total: dataFallas.length,
         eficiencia: `${eficienciaCalculada}%`,
-        tiempoRespuesta: "24 min"
       });
     } catch (e) {
-      console.error(e);
+      console.error("Error fetching data:", e);
     }
   };
 
   useEffect(() => {
     fetchData();
-    const refresh = setInterval(fetchData, 10000);
+    const refresh = setInterval(fetchData, 15000);
     const clock = setInterval(() => setTime(new Date()), 1000);
     return () => { clearInterval(refresh); clearInterval(clock); };
-  }, [lastCriticosCount]);
+  }, []); // Dependencias vacías para evitar duplicar intervalos
 
   useEffect(() => {
     const rotation = setInterval(() => {
@@ -92,7 +91,7 @@ const Dashboard = () => {
       });
     }, 10000);
     return () => clearInterval(rotation);
-  }, [fallas]);
+  }, [fallas.length]);
 
   const fallasVisibles = fallas.slice(pagina * ITEMS_PER_PAGE, (pagina * ITEMS_PER_PAGE) + ITEMS_PER_PAGE);
 
@@ -138,36 +137,37 @@ const Dashboard = () => {
       </section>
 
       <div className="main-content-grid">
-        
-        <main className="table-container">
+        <main className="table-section">
           <h3 className="section-title">INCIDENCIAS ACTIVAS</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>CLIENTE</th>
-                <th>FALLA</th>
-                <th>PRIORIDAD</th>
-                <th>ESTADO</th>
-              </tr>
-            </thead>
-            <tbody key={pagina}>
-              {fallasVisibles.map((f) => (
-                <tr key={f.id_falla} className={f.urgencia === 'Crítica' ? 'row-alert' : ''}>
-                  <td className="bold">{f.nombre_cliente}</td>
-                  <td>{f.tipo_falla}</td>
-                  <td><span className={`pill ${f.urgencia === 'Crítica' ? 'pill-red' : 'pill-warn'}`}>{f.urgencia}</span></td>
-                  <td>{f.estado_reporte}</td>
+          <div className="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>CLIENTE</th>
+                  <th>FALLA</th>
+                  <th>PRIORIDAD</th>
+                  <th>ESTADO</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody key={pagina}>
+                {fallasVisibles.map((f) => (
+                  <tr key={f.id_falla} className={f.urgencia === 'Crítica' ? 'row-alert' : ''}>
+                    <td className="bold">{f.nombre_cliente}</td>
+                    <td>{f.tipo_falla}</td>
+                    <td><span className={`pill ${f.urgencia === 'Crítica' ? 'pill-red' : 'pill-warn'}`}>{f.urgencia}</span></td>
+                    <td>{f.estado_reporte}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </main>
 
         <aside className="maintenance-sidebar">
           <h3 className="section-title">MANTENIMIENTOS <span className="yellow-text">SEMANALES</span></h3>
           <div className="maint-list">
             {mantenimientos.length === 0 ? (
-              <p className="no-data">No hay revisiones programadas para esta semana.</p>
+              <p className="no-data">No hay revisiones programadas.</p>
             ) : (
               mantenimientos.map(m => (
                 <div key={m.id_elevador} className="maint-card">
@@ -201,46 +201,123 @@ const Dashboard = () => {
 
       <style>{`
         :root { --bg: #050505; --card: #121214; --accent: #22c55e; --red: #ff4d4d; --yellow: #fbbf24; --border: #27272a; --text: #ffffff; }
-        .dashboard-pro { height: 100vh; background: var(--bg); color: var(--text); font-family: sans-serif; padding: 20px; display: grid; grid-template-rows: auto auto 1fr auto; gap: 15px; overflow: hidden; }
-        .main-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        
+        * { box-sizing: border-box; }
+
+        .dashboard-pro { 
+          min-height: 100vh; 
+          background: var(--bg); 
+          color: var(--text); 
+          font-family: 'Inter', sans-serif; 
+          padding: 15px; 
+          display: flex;
+          flex-direction: column;
+          gap: 20px; 
+        }
+
+        .main-header { 
+          display: flex; 
+          justify-content: space-between; 
+          align-items: center; 
+          flex-wrap: wrap;
+          gap: 20px;
+          border-bottom: 1px solid var(--border); 
+          padding-bottom: 15px; 
+        }
+
+        .logo-section h1 { font-size: 1.5rem; margin: 5px 0; }
+        .client-badge { font-size: 0.6rem; letter-spacing: 2px; color: #666; }
         .live-text { color: var(--accent); font-weight: 800; }
-        .header-metrics { display: flex; gap: 30px; align-items: center; }
-        .h-value { font-size: 1.5rem; font-weight: bold; color: var(--accent); }
-        .time { font-size: 2.2rem; font-weight: bold; font-family: monospace; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
-        .stat-card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
-        .stat-card .value { font-size: 3.5rem; margin: 5px 0; font-weight: 800; line-height: 1; }
-        .stat-card .label { font-size: 0.7rem; color: #888; font-weight: bold; text-transform: uppercase; }
+        .header-metrics { display: flex; gap: 20px; align-items: center; }
+        .v-line { width: 1px; height: 30px; background: var(--border); }
+        .h-value { font-size: 1.2rem; font-weight: bold; color: var(--accent); display: block; }
+        .h-label { font-size: 0.6rem; color: #666; }
+        .time { font-size: 1.5rem; font-weight: bold; font-family: monospace; }
+        .date { font-size: 0.7rem; color: #666; text-align: right; }
 
-        .main-content-grid { display: grid; grid-template-columns: 1fr 350px; gap: 15px; height: 100%; overflow: hidden; }
-        
-        .section-title { font-size: 0.9rem; letter-spacing: 1px; color: #666; margin-bottom: 10px; text-transform: uppercase; }
-        
-        .table-container { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 15px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; color: #444; font-size: 0.7rem; border-bottom: 1px solid var(--border); }
-        td { padding: 15px 12px; font-size: 1rem; border-bottom: 1px solid #18181a; }
-        .pill { padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
-        .pill-red { background: rgba(255, 77, 77, 0.1); color: var(--red); border: 1px solid var(--red); }
-        .pill-warn { background: rgba(251, 191, 36, 0.1); color: var(--yellow); border: 1px solid var(--yellow); }
+        .stats-grid { 
+          display: grid; 
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+          gap: 15px; 
+        }
 
-        .maintenance-sidebar { background: #0a0a0c; border-radius: 12px; border: 1px solid var(--border); padding: 15px; display: flex; flex-direction: column; }
-        .maint-list { display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
-        .maint-card { background: #161618; padding: 12px; border-radius: 8px; border-left: 4px solid var(--yellow); display: flex; align-items: center; gap: 12px; }
-        .maint-indicator { width: 8px; height: 8px; border-radius: 50%; }
-        .maint-client { font-weight: bold; font-size: 0.9rem; }
-        .maint-loc { font-size: 0.75rem; color: #777; }
-        .maint-date { font-size: 0.75rem; font-weight: bold; margin-top: 4px; }
-        .bg-red { background: var(--red); box-shadow: 0 0 8px var(--red); }
-        .bg-yellow { background: var(--yellow); }
+        .stat-card { 
+          background: var(--card); 
+          padding: 20px; 
+          border-radius: 12px; 
+          border: 1px solid var(--border); 
+        }
+        .stat-card .value { font-size: 2.5rem; margin: 5px 0; font-weight: 800; }
+        .stat-card .label { font-size: 0.65rem; color: #888; text-transform: uppercase; }
+        .yellow-text { color: var(--yellow); }
 
-        .news-ticker { background: #000; height: 40px; display: flex; align-items: center; border-top: 1px solid var(--border); }
-        .ticker-content { display: flex; white-space: nowrap; animation: scroll 40s linear infinite; }
-        .ticker-msg { margin-right: 50px; font-size: 0.9rem; color: #666; }
+        .main-content-grid { 
+          display: grid; 
+          grid-template-columns: 1fr 320px; 
+          gap: 20px; 
+          flex-grow: 1;
+        }
+
+        .table-section { 
+          background: var(--card); 
+          border-radius: 12px; 
+          border: 1px solid var(--border); 
+          padding: 15px; 
+          min-width: 0; 
+        }
+
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th { text-align: left; padding: 12px; color: #555; font-size: 0.7rem; border-bottom: 1px solid var(--border); }
+        td { padding: 14px 12px; font-size: 0.9rem; border-bottom: 1px solid #18181a; }
+
+        .maintenance-sidebar { 
+          background: #0a0a0c; 
+          border-radius: 12px; 
+          border: 1px solid var(--border); 
+          padding: 15px; 
+        }
+
+        .maint-card { 
+          background: #161618; 
+          padding: 12px; 
+          border-radius: 8px; 
+          margin-bottom: 10px;
+          border-left: 4px solid var(--yellow); 
+          display: flex; 
+          align-items: center; 
+          gap: 12px; 
+        }
+
+        .news-ticker { 
+          background: #000; 
+          margin: 0 -15px -15px -15px;
+          height: 35px; 
+          overflow: hidden; 
+          display: flex; 
+          align-items: center; 
+        }
+        .ticker-content { display: flex; animation: scroll 60s linear infinite; }
         @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        .alarm-active { animation: alarmGlow 3s infinite; }
-        @keyframes alarmGlow { 0%, 100% { box-shadow: inset 0 0 50px black; } 50% { box-shadow: inset 0 0 100px rgba(255, 0, 0, 0.1); } }
+
+        /* RESPONSIVIDAD */
+        @media (max-width: 1024px) {
+          .main-content-grid { grid-template-columns: 1fr; }
+          .maintenance-sidebar { order: 2; }
+          .table-section { order: 1; }
+        }
+
+        @media (max-width: 600px) {
+          .main-header { justify-content: center; text-align: center; }
+          .header-metrics { width: 100%; justify-content: space-around; }
+          .stat-card .value { font-size: 2rem; }
+        }
+
+        .critical-bg { background: rgba(255, 77, 77, 0.05); border-color: var(--red); }
+        .row-alert { background: rgba(255, 77, 77, 0.03); }
+        .alarm-active { animation: alarmGlow 2s infinite; }
+        @keyframes alarmGlow { 0% { box-shadow: inset 0 0 20px rgba(255,0,0,0); } 50% { box-shadow: inset 0 0 40px rgba(255,0,0,0.1); } }
       `}</style>
     </div>
   );

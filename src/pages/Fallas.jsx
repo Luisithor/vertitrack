@@ -1,13 +1,29 @@
 import React, { useState, useEffect } from "react";
 import LayoutPublic from "../layout/LayoutPublic";
+// 1. Importaciones necesarias de Firebase
+import { initializeApp } from "firebase/app";
+import { getMessaging, getToken } from "firebase/messaging";
 import { 
   Search, Plus, Edit, Trash2, User, Building, 
   AlertTriangle, Clock, CheckCircle, ShieldAlert,
   ClipboardList, Activity, Info, X, Calendar
 } from "lucide-react";
 
+// 2. Configuración de Firebase (RELLENA CON TUS DATOS)
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "vertitrack-f6f00.firebaseapp.com",
+  projectId: "vertitrack-f6f00",
+  storageBucket: "vertitrack-f6f00.firebasestorage.app",
+  messagingSenderId: "TU_MESSAGING_SENDER_ID",
+  appId: "TU_APP_ID"
+};
+
+// Inicializamos Firebase fuera para que no se reinicie cada vez que React renderiza
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
+
 const Fallas = () => {
-  // ... (Estados y funciones se mantienen exactamente igual que en tu código)
   const [fallas, setFallas] = useState([]);
   const [elevadores, setElevadores] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,11 +44,46 @@ const Fallas = () => {
     estado_reporte: "Pendiente",
   });
 
+  // 3. Lógica para activar las Notificaciones Push
   useEffect(() => {
+    const habilitarNotificaciones = async () => {
+      try {
+        // Pedimos permiso al navegador
+        const permiso = await Notification.requestPermission();
+        
+        if (permiso === "granted") {
+          // Si acepta, generamos el Token (la dirección del dispositivo)
+          const tokenActual = await getToken(messaging, { 
+            vapidKey: "BF-TBxOz3GpCZW4iczgoDS8j05pcCEGAc80ThHOhzK_EdYKh4SAhMuG9ZMhWzjp0Um386lyfDOL-As6QfWwK6pg" 
+          });
+
+          if (tokenActual) {
+            console.log("Token generado con éxito:", tokenActual);
+            
+            // Enviamos el token al backend para guardarlo en la DB
+            await fetch("https://vertitrack-backend.onrender.com/api/usuarios/actualizar-token", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ 
+                id_usuario: idUsuarioLogueado, 
+                token_push: tokenActual 
+              }),
+            });
+          }
+        } else {
+          console.warn("El usuario bloqueó las notificaciones.");
+        }
+      } catch (error) {
+        console.error("Error al configurar notificaciones:", error);
+      }
+    };
+
+    habilitarNotificaciones();
     fetchFallas();
     fetchElevadores();
-  }, []);
+  }, [idUsuarioLogueado]);
 
+  // --- Funciones de carga de datos (Se mantienen igual) ---
   const fetchFallas = async () => {
     setLoading(true);
     try {
@@ -147,7 +198,7 @@ const Fallas = () => {
     <LayoutPublic>
       <div className="container-fluid px-2 px-md-4 py-4 bg-light min-vh-100">
         
-        {/* Header Responsivo */}
+        {/* Header */}
         <div className="row mb-4">
           <div className="col-12">
             <div className="bg-white rounded-3 shadow-sm px-3 px-md-4 py-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
@@ -168,7 +219,7 @@ const Fallas = () => {
           </div>
         </div>
 
-        {/* Stats Grid - Scrollable en móvil */}
+        {/* Stats Grid */}
         <div className="row g-3 mb-4 overflow-auto flex-nowrap flex-md-wrap pb-2 pb-md-0">
           {[
             { label: "Total", val: stats.total, color: "primary", icon: ClipboardList },
@@ -192,14 +243,14 @@ const Fallas = () => {
           ))}
         </div>
 
-        {/* Filtros y Acciones */}
+        {/* Filtros */}
         <div className="card border-0 shadow-sm mb-4">
           <div className="card-body">
             <div className="row g-3">
               <div className="col-12 col-lg-4">
                 <div className="input-group">
                   <span className="input-group-text bg-white border-end-0"><Search size={18} className="text-muted" /></span>
-                  <input type="text" className="form-control border-start-0 ps-0" placeholder="Buscar falla o cliente..." 
+                  <input type="text" className="form-control border-start-0 ps-0" placeholder="Buscar falla..." 
                     value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                 </div>
               </div>
@@ -229,9 +280,8 @@ const Fallas = () => {
           </div>
         </div>
 
-        {/* Listado - Vista de Tabla (Desktop) y Tarjetas (Móvil) */}
+        {/* Tabla / Listado */}
         <div className="card border-0 shadow-sm overflow-hidden">
-          {/* Tabla Oculta en XS/SM */}
           <div className="table-responsive d-none d-md-block">
             <table className="table table-hover align-middle mb-0">
               <thead className="bg-light text-muted small fw-bold">
@@ -275,53 +325,22 @@ const Fallas = () => {
               </tbody>
             </table>
           </div>
-
-          {/* Tarjetas Visibles en XS/SM */}
-          <div className="d-md-none">
-            {loading ? (
-              <div className="text-center py-5"><div className="spinner-border text-danger" /></div>
-            ) : filteredFallas.map((f) => {
-              const elevador = getElevadorInfo(f.id_elevador);
-              const urgencia = getUrgenciaBadge(f.urgencia);
-              const estado = getEstadoBadge(f.estado_reporte);
-              return (
-                <div key={f.id_falla} className="p-3 border-bottom">
-                  <div className="d-flex justify-content-between align-items-start mb-2">
-                    <span className="fw-bold text-muted small">#{f.id_falla}</span>
-                    <div className="d-flex gap-2">
-                      <span className={`badge ${urgencia.class} bg-opacity-10 text-dark small`}><urgencia.icon size={12}/></span>
-                      <span className={`badge ${estado.class} bg-opacity-10 text-dark small`}><estado.icon size={12}/></span>
-                    </div>
-                  </div>
-                  <h6 className="mb-0 fw-bold">{elevador?.ubicacion_especifica}</h6>
-                  <p className="small text-muted mb-2">{elevador?.nombre_cliente}</p>
-                  <div className="d-flex justify-content-between align-items-center">
-                    <small className="text-primary fw-bold"><User size={12} /> {f.nombre_usuario || "Sistema"}</small>
-                    <div className="btn-group gap-2">
-                      <button onClick={() => openModal(f)} className="btn btn-sm btn-light border"><Edit size={16}/></button>
-                      <button className="btn btn-sm btn-light border text-danger"><Trash2 size={16}/></button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         </div>
 
-        {/* Modal Responsivo */}
+        {/* Modal */}
         {isModalOpen && (
           <div className="modal show d-block p-2" style={{ backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
-            <div className="modal-dialog modal-lg modal-dialog-centered mx-auto" style={{ maxWidth: '100%', width: 'auto' }}>
+            <div className="modal-dialog modal-lg modal-dialog-centered mx-auto">
               <div className="modal-content border-0 shadow-lg">
                 <div className="modal-header border-0 bg-light p-3">
-                  <h5 className="modal-title fw-bold small d-flex align-items-center gap-2">
+                  <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
                     <ShieldAlert className="text-danger" size={18} />
                     {currentFalla ? "Editar Reporte" : "Nueva Incidencia"}
                   </h5>
                   <button className="btn-close" onClick={() => setIsModalOpen(false)}></button>
                 </div>
                 <form onSubmit={handleSubmit}>
-                  <div className="modal-body p-3" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+                  <div className="modal-body p-3">
                     <div className="row g-3">
                       <div className="col-12">
                         <label className="form-label x-small fw-bold text-muted text-uppercase">Responsable</label>
@@ -359,9 +378,9 @@ const Fallas = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="modal-footer border-0 bg-light p-2 d-flex flex-column flex-md-row">
-                    <button type="button" className="btn btn-link text-muted w-100 w-md-auto mb-2 mb-md-0" onClick={() => setIsModalOpen(false)}>Cancelar</button>
-                    <button type="submit" className="btn btn-danger w-100 w-md-auto px-4 shadow-sm" disabled={loading}>
+                  <div className="modal-footer border-0 bg-light p-2">
+                    <button type="button" className="btn btn-link text-muted" onClick={() => setIsModalOpen(false)}>Cancelar</button>
+                    <button type="submit" className="btn btn-danger px-4 shadow-sm" disabled={loading}>
                       {currentFalla ? "Guardar" : "Reportar"}
                     </button>
                   </div>
@@ -374,11 +393,7 @@ const Fallas = () => {
         <style>{`
           .x-small { font-size: 0.7rem; }
           .border-md-0 { border: none !important; }
-          @media (max-width: 768px) {
-            .container-fluid { padding-bottom: 80px !important; }
-          }
         `}</style>
-
       </div>
     </LayoutPublic>
   );
