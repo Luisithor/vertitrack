@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 
 const FALLAS_PER_PAGE = 5;
-const MAINT_PER_PAGE = 4;
-const ROTATION_INTERVAL = 10000;
+const MAINT_PER_PAGE = 3; // Reducido para pantallas de celular
+const ROTATION_INTERVAL = 8000;
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -87,12 +87,11 @@ const Dashboard = () => {
           <h1>VERTITRACK <span className="live-dot">●</span></h1>
         </div>
         <div className="clock-box">
-          <div className="time">{time.toLocaleTimeString([], { hour12: false })}</div>
-          <div className="date">{time.toLocaleDateString()}</div>
+          <div className="time">{time.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' })}</div>
         </div>
       </header>
 
-      {/* Stats con Skeleton UI */}
+      {/* Stats - Ahora 2x2 en móviles */}
       <section className="stats-grid">
         {['CRÍTICOS', 'PENDIENTES', 'PRÓX. MANT.', 'TOTAL'].map((label, i) => (
           <div key={label} className="stat-card">
@@ -105,12 +104,12 @@ const Dashboard = () => {
       </section>
 
       <div className="main-content-grid">
-        {/* Tabla con Skeleton UI */}
+        {/* Tabla Responsiva */}
         <main className="table-section">
           <h3 className="section-title">INCIDENCIAS ACTIVAS</h3>
-          <div className="table-responsive">
-            <table>
-              <thead><tr><th>CLIENTE</th><th>FALLA</th><th>PRIORIDAD</th><th>ESTADO</th></tr></thead>
+          <div className="table-wrapper">
+            <table className="responsive-table">
+              <thead><tr><th>CLIENTE</th><th>FALLA</th><th className="hide-mobile">PRIORIDAD</th><th className="hide-mobile">ESTADO</th></tr></thead>
               <tbody>
                 {loading ? [1,2,3,4,5].map(i => (
                   <tr key={i} className="skeleton-row">
@@ -121,8 +120,8 @@ const Dashboard = () => {
                   <tr key={f.id_falla} className={f.urgencia === 'Crítica' ? 'row-alert' : ''}>
                     <td className="bold">{f.nombre_cliente}</td>
                     <td>{f.tipo_falla}</td>
-                    <td><span className={`pill ${f.urgencia === 'Crítica' ? 'pill-red' : 'pill-warn'}`}>{f.urgencia}</span></td>
-                    <td>{f.estado_reporte}</td>
+                    <td className="hide-mobile"><span className={`pill ${f.urgencia === 'Crítica' ? 'pill-red' : 'pill-warn'}`}>{f.urgencia}</span></td>
+                    <td className="hide-mobile">{f.estado_reporte}</td>
                   </tr>
                 ))}
               </tbody>
@@ -138,7 +137,7 @@ const Dashboard = () => {
                 <div key={m.id_elevador} className={`maint-card ${m.fechaProx < time ? 'vencido' : ''}`}>
                   <div className="maint-info">
                     <div className="maint-client">{m.nombre_cliente}</div>
-                    <div className="maint-date">FECHA: {m.fechaProx.toLocaleDateString()}</div>
+                    <div className="maint-date">{m.fechaProx.toLocaleDateString()}</div>
                   </div>
                 </div>
               ))}
@@ -146,11 +145,10 @@ const Dashboard = () => {
         </aside>
       </div>
 
-      {/* Ticker Pausable */}
       <footer className="news-ticker">
         <div className="ticker-track">
           <div className="ticker-content">
-            {loading ? <span className="ticker-msg">Sincronizando flujo de datos...</span> : 
+            {loading ? <span className="ticker-msg">Iniciando...</span> : 
               fallas.concat(fallas).map((f, i) => (
                 <span key={i} className="ticker-msg">
                   <strong>{f.nombre_cliente}:</strong> {f.tipo_falla} | 
@@ -166,48 +164,59 @@ const Dashboard = () => {
           --bg: #050505; --card: #121214; --accent: #22c55e; 
           --red: #ff4d4d; --yellow: #FCD34D; --border: #27272a; 
         }
-        .dashboard-pro { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; padding: 20px; min-height: 100vh; }
-        .main-header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        * { box-sizing: border-box; }
+        .dashboard-pro { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; padding: 15px; min-height: 100vh; overflow-x: hidden; }
         
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 20px 0; }
-        .stat-card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
-        .stat-card .value { font-size: 2.5rem; font-weight: 800; margin-top: 10px; }
-        
-        .main-content-grid { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
-        .table-section, .maintenance-sidebar { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
-        
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; font-size: 0.7rem; color: #666; padding: 10px; }
-        td { padding: 14px 10px; border-bottom: 1px solid #1a1a1c; font-size: 0.9rem; }
-        
-        .pill { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
-        .pill-red { background: rgba(255, 77, 77, 0.15); color: var(--red); }
-        .pill-warn { background: rgba(252, 211, 77, 0.1); color: var(--yellow); } /* Contraste Optimizado */
-        
-        /* TICKER PAUSABLE */
-        .news-ticker { background: #000; height: 40px; display: flex; align-items: center; overflow: hidden; margin: 20px -20px -20px -20px; }
-        .ticker-track:hover .ticker-content { animation-play-state: paused; cursor: pointer; }
-        .ticker-content { display: flex; animation: scroll 60s linear infinite; white-space: nowrap; }
-        @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        
-        /* SKELETON UI */
-        .skeleton-box { 
-          background: linear-gradient(90deg, #1a1a1c 25%, #27272a 50%, #1a1a1c 75%);
-          background-size: 200% 100%;
-          animation: shimmer 1.5s infinite;
-          border-radius: 4px;
-        }
-        .s-value { width: 60px; height: 40px; }
-        .s-row { width: 100%; height: 20px; }
-        .s-card { height: 80px; margin-bottom: 10px; border-radius: 8px; }
-        @keyframes shimmer { to { background-position: -200% 0; } }
+        .main-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+        .logo-section h1 { font-size: 1.2rem; margin: 0; }
+        .clock-box .time { font-size: 1.2rem; font-weight: bold; font-family: monospace; color: var(--accent); }
 
-        .vencido { border-left: 4px solid var(--red) !important; background: rgba(255, 77, 77, 0.05); }
-        .alarm-active { animation: alarmGlow 2s infinite; }
-        @keyframes alarmGlow { 50% { box-shadow: inset 0 0 60px rgba(255,0,0,0.15); } }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
+        .stat-card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
+        .stat-card .value { font-size: 1.8rem; font-weight: 800; margin: 5px 0 0 0; }
+        .stat-card .label { font-size: 0.6rem; color: #888; letter-spacing: 1px; }
+
+        .main-content-grid { display: flex; flex-direction: column; gap: 15px; }
+        .table-section, .maintenance-sidebar { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
+
+        .responsive-table { width: 100%; border-collapse: collapse; }
+        .responsive-table th { text-align: left; font-size: 0.65rem; color: #666; padding: 8px; border-bottom: 1px solid var(--border); }
+        .responsive-table td { padding: 12px 8px; border-bottom: 1px solid #1a1a1c; font-size: 0.85rem; }
+
+        .maint-card { background: #1a1a1c; padding: 12px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid var(--yellow); }
+        .maint-client { font-weight: bold; font-size: 0.9rem; }
+        .maint-date { font-size: 0.75rem; color: #888; margin-top: 4px; }
+
+        /* TICKER MOBILE */
+        .news-ticker { background: #000; height: 35px; display: flex; align-items: center; position: fixed; bottom: 0; left: 0; right: 0; }
+        .ticker-content { display: flex; animation: scroll 40s linear infinite; }
+        .ticker-msg { font-size: 0.75rem; padding: 0 20px; white-space: nowrap; }
+
+        /* MEDIA QUERIES */
+        @media (min-width: 1024px) {
+          .stats-grid { grid-template-columns: repeat(4, 1fr); }
+          .main-content-grid { display: grid; grid-template-columns: 1fr 320px; }
+          .logo-section h1 { font-size: 1.5rem; }
+          .dashboard-pro { padding: 25px; }
+        }
+
+        @media (max-width: 600px) {
+          .hide-mobile { display: none; }
+          .dashboard-pro { padding-bottom: 50px; } /* Espacio para el ticker fixed */
+        }
+
+        /* SKELETON & ANIMATIONS */
+        .skeleton-box { background: linear-gradient(90deg, #1a1a1c 25%, #27272a 50%, #1a1a1c 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
+        .s-value { width: 40px; height: 30px; }
+        .s-row { width: 100%; height: 15px; }
+        .s-card { height: 60px; margin-bottom: 8px; }
+        @keyframes shimmer { to { background-position: -200% 0; } }
+        @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .vencido { border-left-color: var(--red); background: rgba(255, 77, 77, 0.05); }
       `}</style>
     </div>
   );
 };
+
 
 export default Dashboard;
