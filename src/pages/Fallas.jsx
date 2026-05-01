@@ -1,27 +1,14 @@
 import React, { useState, useEffect } from "react";
 import LayoutPublic from "../layout/LayoutPublic";
-// 1. Importaciones necesarias de Firebase
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken } from "firebase/messaging";
 import {
-  Search,
-  Plus,
-  Edit,
-  Trash2,
-  User,
-  Building,
-  AlertTriangle,
-  Clock,
-  CheckCircle,
-  ShieldAlert,
-  ClipboardList,
-  Activity,
-  Info,
-  X,
-  Calendar,
+  Search, Plus, Edit, AlertTriangle, Clock, 
+  CheckCircle, ShieldAlert, ClipboardList, 
+  Activity, Info, Calendar, Building, User
 } from "lucide-react";
 
-// 2. Configuración de Firebase (RELLENA CON TUS DATOS)
+// Configuración de Firebase
 const firebaseConfig = {
   apiKey: "TU_API_KEY",
   authDomain: "vertitrack-f6f00.firebaseapp.com",
@@ -31,7 +18,6 @@ const firebaseConfig = {
   appId: "TU_APP_ID",
 };
 
-// Inicializamos Firebase fuera para que no se reinicie cada vez que React renderiza
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
@@ -45,8 +31,7 @@ const Fallas = () => {
   const [filtroUrgencia, setFiltroUrgencia] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("");
 
-  const nombreUsuarioLogueado =
-    localStorage.getItem("nombre_usuario") || "Usuario";
+  const nombreUsuarioLogueado = localStorage.getItem("nombre_usuario") || "Usuario";
   const idUsuarioLogueado = localStorage.getItem("id_usuario");
 
   const [formData, setFormData] = useState({
@@ -57,38 +42,25 @@ const Fallas = () => {
     estado_reporte: "Pendiente",
   });
 
-  // 3. Lógica para activar las Notificaciones Push
   useEffect(() => {
     const habilitarNotificaciones = async () => {
       try {
-        // Pedimos permiso al navegador
         const permiso = await Notification.requestPermission();
-
         if (permiso === "granted") {
-          // Si acepta, generamos el Token (la dirección del dispositivo)
           const tokenActual = await getToken(messaging, {
-            vapidKey:
-              "BF-TBxOz3GpCZW4iczgoDS8j05pcCEGAc80ThHOhzK_EdYKh4SAhMuG9ZMhWzjp0Um386lyfDOL-As6QfWwK6pg",
+            vapidKey: "BF-TBxOz3GpCZW4iczgoDS8j05pcCEGAc80ThHOhzK_EdYKh4SAhMuG9ZMhWzjp0Um386lyfDOL-As6QfWwK6pg",
           });
 
           if (tokenActual) {
-            console.log("Token generado con éxito:", tokenActual);
-
-            // Enviamos el token al backend para guardarlo en la DB
-            await fetch(
-              "https://vertitrack-backend.onrender.com/api/usuarios/actualizar-token",
-              {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  id_usuario: idUsuarioLogueado,
-                  token_push: tokenActual,
-                }),
-              },
-            );
+            await fetch("https://vertitrack-backend.onrender.com/api/usuarios/actualizar-token", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                id_usuario: idUsuarioLogueado,
+                token_push: tokenActual,
+              }),
+            });
           }
-        } else {
-          console.warn("El usuario bloqueó las notificaciones.");
         }
       } catch (error) {
         console.error("Error al configurar notificaciones:", error);
@@ -100,53 +72,31 @@ const Fallas = () => {
     fetchElevadores();
   }, [idUsuarioLogueado]);
 
-  // --- Funciones de carga de datos (Se mantienen igual) ---
   const fetchFallas = async () => {
     setLoading(true);
     try {
-      const res = await fetch(
-        "https://vertitrack-backend.onrender.com/api/fallas/lista",
-      );
+      const res = await fetch("https://vertitrack-backend.onrender.com/api/fallas/lista");
       const data = await res.json();
       setFallas(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Error cargando fallas:", error);
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { console.error(error); } 
+    finally { setLoading(false); }
   };
 
   const fetchElevadores = async () => {
     try {
-      const res = await fetch(
-        "https://vertitrack-backend.onrender.com/api/elevadores/lista",
-      );
+      const res = await fetch("https://vertitrack-backend.onrender.com/api/elevadores/lista");
       const data = await res.json();
       setElevadores(data);
-    } catch (error) {
-      console.error("Error cargando elevadores:", error);
-    }
+    } catch (error) { console.error(error); }
   };
 
   const openModal = (falla = null) => {
     if (falla) {
       setCurrentFalla(falla);
-      setFormData({
-        id_elevador: falla.id_elevador,
-        tipo_falla: falla.tipo_falla,
-        descripcion_falla: falla.descripcion_falla || "",
-        urgencia: falla.urgencia,
-        estado_reporte: falla.estado_reporte,
-      });
+      setFormData({ ...falla, descripcion_falla: falla.descripcion_falla || "" });
     } else {
       setCurrentFalla(null);
-      setFormData({
-        id_elevador: "",
-        tipo_falla: "",
-        descripcion_falla: "",
-        urgencia: "Media",
-        estado_reporte: "Pendiente",
-      });
+      setFormData({ id_elevador: "", tipo_falla: "", descripcion_falla: "", urgencia: "Media", estado_reporte: "Pendiente" });
     }
     setIsModalOpen(true);
   };
@@ -166,417 +116,230 @@ const Fallas = () => {
       });
       setIsModalOpen(false);
       fetchFallas();
-    } catch (error) {
-      console.error("Error submitting form:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getElevadorInfo = (id_elevador) => {
-    return elevadores.find((e) => e.id_elevador === id_elevador) || null;
+    } catch (error) { console.error(error); } 
+    finally { setLoading(false); }
   };
 
   const getUrgenciaBadge = (urgencia) => {
     const badges = {
-      Crítica: { class: "bg-danger", icon: ShieldAlert },
-      Alta: { class: "bg-warning text-dark", icon: AlertTriangle },
-      Media: { class: "bg-info", icon: Info },
-      Baja: { class: "bg-secondary", icon: Activity },
+      Crítica: { class: "bg-danger text-danger", icon: ShieldAlert },
+      Alta: { class: "bg-warning text-warning", icon: AlertTriangle },
+      Media: { class: "bg-info text-info", icon: Info },
+      Baja: { class: "bg-secondary text-secondary", icon: Activity },
     };
-    return badges[urgencia] || { class: "bg-info", icon: Info };
+    return badges[urgencia] || badges["Media"];
   };
 
   const getEstadoBadge = (estado) => {
     const badges = {
-      Pendiente: { class: "bg-warning text-dark", icon: Clock },
-      "En Proceso": { class: "bg-info", icon: Edit },
-      Atendido: { class: "bg-success", icon: CheckCircle },
+      Pendiente: { class: "bg-warning text-warning", icon: Clock },
+      "En Proceso": { class: "bg-info text-info", icon: Edit },
+      Atendido: { class: "bg-success text-success", icon: CheckCircle },
     };
-    return badges[estado] || { class: "bg-warning text-dark", icon: Clock };
+    return badges[estado] || badges["Pendiente"];
   };
 
   const filteredFallas = fallas.filter((falla) => {
-    const elevador = getElevadorInfo(falla.id_elevador);
+    const elevador = elevadores.find(e => e.id_elevador === falla.id_elevador);
     const matchesSearch =
       falla.tipo_falla?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      falla.descripcion_falla
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      elevador?.ubicacion_especifica
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      elevador?.nombre_cliente
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase());
-    const matchesUrgencia =
-      !filtroUrgencia || falla.urgencia === filtroUrgencia;
-    const matchesEstado = filtroEstado
-      ? falla.estado_reporte === filtroEstado // Si elijo uno, se muestra ese (ej. Atendido)
-      : falla.estado_reporte !== "Atendido"; // Si no hay filtro, SE EXCLUYEN los Atendidos
+      falla.descripcion_falla?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      elevador?.ubicacion_especifica?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      elevador?.nombre_cliente?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesUrgencia = !filtroUrgencia || falla.urgencia === filtroUrgencia;
+    const matchesEstado = filtroEstado ? falla.estado_reporte === filtroEstado : falla.estado_reporte !== "Atendido";
+    
     return matchesSearch && matchesUrgencia && matchesEstado;
   });
 
-  const stats = {
-    total: filteredFallas.length,
-    criticas: filteredFallas.filter((f) => f.urgencia === "Crítica").length,
-    pendientes: filteredFallas.filter((f) => f.estado_reporte === "Pendiente")
-      .length,
-    enProceso: filteredFallas.filter((f) => f.estado_reporte === "En Proceso")
-      .length,
-  };
-
   return (
     <LayoutPublic>
-      <div className="container-fluid px-2 px-md-4 py-4 bg-light min-vh-100">
-        {/* Header */}
-        <div className="row mb-4">
-          <div className="col-12">
-            <div className="bg-white rounded-3 shadow-sm px-3 px-md-4 py-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-              <div className="d-flex align-items-center w-100">
-                <div className="bg-danger bg-opacity-10 rounded-3 p-2 me-3">
+      <div className="container-fluid px-4 py-4 bg-light min-vh-100">
+        
+        {/* Header Superior al estilo Elevadores */}
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h4 className="fw-bold mb-0">Gestión de Fallas</h4>
+            <p className="text-muted small">Control técnico de incidencias y reportes</p>
+          </div>
+          <button className="btn btn-danger d-flex align-items-center gap-2 shadow-sm px-4 py-2" onClick={() => openModal()}>
+            <Plus size={18} /> Nuevo Reporte
+          </button>
+        </div>
+
+        {/* Stats Grid con diseño de Cards */}
+        <div className="row g-3 mb-4">
+          <div className="col-md-3">
+            <div className="card border-0 shadow-sm h-100">
+              <div className="card-body d-flex align-items-center">
+                <div className="bg-danger bg-opacity-10 p-3 rounded-3 me-3">
                   <ShieldAlert className="text-danger" size={24} />
                 </div>
                 <div>
-                  <h5 className="mb-0 fw-bold">Gestión de Fallas</h5>
-                  <small className="text-muted d-none d-sm-block">
-                    Control técnico de incidencias
-                  </small>
+                  <h6 className="text-muted small mb-0">Incidencias Activas</h6>
+                  <h4 className="fw-bold mb-0">{filteredFallas.length}</h4>
                 </div>
-              </div>
-              <div className="d-flex align-items-center gap-2 text-muted small w-100 justify-content-md-end border-top pt-2 pt-md-0 border-md-0">
-                <Calendar size={16} />
-                {new Date().toLocaleDateString()}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="row g-3 mb-4 overflow-auto flex-nowrap flex-md-wrap pb-2 pb-md-0">
-          {[
-            {
-              label: "Total",
-              val: stats.total,
-              color: "primary",
-              icon: ClipboardList,
-            },
-            {
-              label: "Críticas",
-              val: stats.criticas,
-              color: "danger",
-              icon: ShieldAlert,
-            },
-            {
-              label: "Pendientes",
-              val: stats.pendientes,
-              color: "warning",
-              icon: Clock,
-            },
-            {
-              label: "Proceso",
-              val: stats.enProceso,
-              color: "info",
-              icon: Edit,
-            },
-          ].map((item, idx) => (
-            <div className="col-8 col-sm-6 col-md-3" key={idx}>
-              <div className="card border-0 shadow-sm h-100">
-                <div className="card-body d-flex align-items-center p-3">
-                  <div
-                    className={`bg-${item.color} bg-opacity-10 rounded-3 p-2 p-md-3 me-3`}
-                  >
-                    <item.icon className={`text-${item.color}`} size={20} />
-                  </div>
-                  <div>
-                    <h6 className="text-muted small mb-0">{item.label}</h6>
-                    <h4 className="mb-0 fw-bold">{item.val}</h4>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Filtros */}
+        {/* Barra de Búsqueda y Filtros */}
         <div className="card border-0 shadow-sm mb-4">
-          <div className="card-body">
+          <div className="card-body p-3">
             <div className="row g-3">
-              <div className="col-12 col-lg-4">
+              <div className="col-md-6">
                 <div className="input-group">
-                  <span className="input-group-text bg-white border-end-0">
+                  <span className="input-group-text bg-light border-0">
                     <Search size={18} className="text-muted" />
                   </span>
                   <input
                     type="text"
-                    className="form-control border-start-0 ps-0"
-                    placeholder="Buscar falla..."
+                    className="form-control bg-light border-0 ps-0"
+                    placeholder="Buscar por falla, cliente o ubicación..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
               </div>
-              <div className="col-6 col-lg-2">
-                <select
-                  className="form-select"
-                  value={filtroUrgencia}
-                  onChange={(e) => setFiltroUrgencia(e.target.value)}
-                >
-                  <option value="">Urgencia</option>
+              <div className="col-md-3">
+                <select className="form-select border-0 bg-light" value={filtroUrgencia} onChange={(e) => setFiltroUrgencia(e.target.value)}>
+                  <option value="">Todas las Urgencias</option>
                   <option value="Crítica">Crítica</option>
                   <option value="Alta">Alta</option>
                   <option value="Media">Media</option>
-                  <option value="Baja">Baja</option>
                 </select>
               </div>
-              <div className="col-6 col-lg-2">
-                <select
-                  className="form-select"
-                  value={filtroEstado}
-                  onChange={(e) => setFiltroEstado(e.target.value)}
-                >
-                  <option value="">Estado</option>
-                  <option value="Pendiente">Pendiente</option>
-                  <option value="En Proceso">En Proceso</option>
-                  <option value="Atendido">Atendido</option>
+              <div className="col-md-3">
+                <select className="form-select border-0 bg-light" value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
+                  <option value="">Pendientes y En Proceso</option>
+                  <option value="Pendiente">Solo Pendientes</option>
+                  <option value="En Proceso">Solo En Proceso</option>
+                  <option value="Atendido">Ver Historial (Atendidos)</option>
                 </select>
-              </div>
-              <div className="col-12 col-lg-4 text-lg-end">
-                <button
-                  onClick={() => openModal()}
-                  className="btn btn-danger w-100 w-lg-auto px-4 d-inline-flex align-items-center justify-content-center gap-2 shadow-sm"
-                >
-                  <Plus size={18} /> Nuevo Reporte
-                </button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Tabla / Listado */}
-        <div className="card border-0 shadow-sm overflow-hidden">
-          <div className="table-responsive d-none d-md-block">
-            <table className="table table-hover align-middle mb-0">
-              <thead className="bg-light text-muted small fw-bold">
-                <tr>
-                  <th className="px-4 py-3">ID</th>
-                  <th className="py-3">ELEVADOR / CLIENTE</th>
-                  <th className="py-3">Técnico</th>
-                  <th className="py-3 text-center">URGENCIA</th>
-                  <th className="py-3 text-center">ESTADO</th>
-                  <th className="py-3 text-end px-4">ACCIONES</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan="6" className="text-center py-5">
-                      <div className="spinner-border text-danger" />
-                    </td>
-                  </tr>
-                ) : (
-                  filteredFallas.map((f) => {
-                    const elevador = getElevadorInfo(f.id_elevador);
-                    const urgencia = getUrgenciaBadge(f.urgencia);
-                    const estado = getEstadoBadge(f.estado_reporte);
-                    return (
-                      <tr key={f.id_falla}>
-                        <td className="px-4 fw-bold text-muted">
-                          #{f.id_falla}
-                        </td>
-                        <td>
-                          <div className="fw-bold">
-                            {elevador?.ubicacion_especifica || "..."}
-                          </div>
-                          <small className="text-muted text-uppercase">
-                            {elevador?.nombre_cliente || "---"}
+        {/* Grid de Fallas (Cards Responsivas) */}
+        <div className="row g-4">
+          {loading ? (
+            <div className="col-12 text-center py-5"><div className="spinner-border text-danger" /></div>
+          ) : filteredFallas.length === 0 ? (
+            <div className="col-12 text-center py-5 bg-white rounded-3 shadow-sm">
+              <ClipboardList size={48} className="text-muted mb-3 opacity-25" />
+              <h5 className="text-muted">No hay reportes que coincidan</h5>
+            </div>
+          ) : (
+            filteredFallas.map((f) => {
+              const elevador = elevadores.find(e => e.id_elevador === f.id_elevador);
+              const urgBadge = getUrgenciaBadge(f.urgencia);
+              const estBadge = getEstadoBadge(f.estado_reporte);
+              const StatusIcon = estBadge.icon;
+              const UrgenciaIcon = urgBadge.icon;
+
+              return (
+                <div className="col-md-6 col-lg-4 col-xl-3" key={f.id_falla}>
+                  <div className="card border-0 shadow-sm h-100 lift-card">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between align-items-start mb-3">
+                        <span className={`badge ${urgBadge.class} bg-opacity-10 d-flex align-items-center gap-1 p-2`}>
+                          <UrgenciaIcon size={14} /> {f.urgencia}
+                        </span>
+                        <button className="btn btn-sm btn-light text-danger rounded-circle p-2" onClick={() => openModal(f)}>
+                          <Edit size={16} />
+                        </button>
+                      </div>
+
+                      <div className="mb-3">
+                        <div className="d-flex align-items-center gap-2 mb-1">
+                          <Building size={14} className="text-danger" />
+                          <small className="text-uppercase fw-bold text-muted" style={{ letterSpacing: '0.5px', fontSize: '0.7rem' }}>
+                            {elevador?.nombre_cliente || "Cargando..."}
                           </small>
-                        </td>
-                        <td>
-                          <span className="small fw-semibold">
-                            {f.nombre_usuario || "SISTEMA"}
-                          </span>
-                        </td>
-                        <td className="text-center">
-                          <span
-                            className={`badge ${urgencia.class} bg-opacity-10 text-dark p-2`}
-                          >
-                            <urgencia.icon size={14} className="me-1" />
-                            {f.urgencia}
-                          </span>
-                        </td>
-                        <td className="text-center">
-                          <span
-                            className={`badge ${estado.class} bg-opacity-10 text-dark p-2`}
-                          >
-                            <estado.icon size={14} className="me-1" />
-                            {f.estado_reporte}
-                          </span>
-                        </td>
-                        <td className="text-end px-4">
-                          <button
-                            onClick={() => openModal(f)}
-                            className="btn btn-sm btn-light border me-1"
-                          >
-                            <Edit size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                        </div>
+                        <h5 className="fw-bold mb-0 text-dark">{f.tipo_falla}</h5>
+                        <p className="text-muted small mb-2">{elevador?.ubicacion_especifica}</p>
+                      </div>
+
+                      <div className="bg-light rounded-3 p-3 mb-3">
+                        <p className="small text-muted mb-0" style={{ display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {f.descripcion_falla || "Sin descripción adicional."}
+                        </p>
+                      </div>
+
+                      <div className="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+                        <div className="d-flex align-items-center gap-2">
+                           <User size={14} className="text-muted" />
+                           <span className="x-small fw-bold text-muted">{f.nombre_usuario || "Sistema"}</span>
+                        </div>
+                        <div className={`d-flex align-items-center gap-1 small fw-bold ${estBadge.class.replace('bg-', 'text-')}`}>
+                          <StatusIcon size={14} /> {f.estado_reporte}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
 
-        {/* Modal */}
+        {/* Modal de Reporte */}
         {isModalOpen && (
-          <div
-            className="modal show d-block p-2"
-            style={{
-              backgroundColor: "rgba(0,0,0,0.6)",
-              backdropFilter: "blur(4px)",
-            }}
-          >
-            <div className="modal-dialog modal-lg modal-dialog-centered mx-auto">
+          <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
+            <div className="modal-dialog modal-lg modal-dialog-centered">
               <div className="modal-content border-0 shadow-lg">
-                <div className="modal-header border-0 bg-light p-3">
-                  <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
-                    <ShieldAlert className="text-danger" size={18} />
-                    {currentFalla ? "Editar Reporte" : "Nueva Incidencia"}
-                  </h5>
-                  <button
-                    className="btn-close"
-                    onClick={() => setIsModalOpen(false)}
-                  ></button>
+                <div className="modal-header border-0 pb-0">
+                  <h5 className="fw-bold">{currentFalla ? "Actualizar Reporte" : "Nueva Incidencia"}</h5>
+                  <button className="btn-close" onClick={() => setIsModalOpen(false)}></button>
                 </div>
                 <form onSubmit={handleSubmit}>
-                  <div className="modal-body p-3">
+                  <div className="modal-body py-4">
                     <div className="row g-3">
-                      <div className="col-12">
-                        <label className="form-label x-small fw-bold text-muted text-uppercase">
-                          Responsable
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control bg-light"
-                          value={nombreUsuarioLogueado}
-                          readOnly
-                          disabled
-                        />
-                      </div>
-                      <div className="col-12">
-                        <label className="form-label x-small fw-bold text-muted text-uppercase">
-                          Equipo *
-                        </label>
-                        <select
-                          className="form-select"
-                          required
-                          value={formData.id_elevador}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              id_elevador: parseInt(e.target.value),
-                            })
-                          }
-                        >
-                          <option value="">Seleccionar...</option>
+                      <div className="col-md-6">
+                        <label className="form-label small fw-bold text-muted">ELEVADOR AFECTADO</label>
+                        <select className="form-select form-select-lg" required value={formData.id_elevador} 
+                          onChange={(e) => setFormData({ ...formData, id_elevador: parseInt(e.target.value) })}>
+                          <option value="">Seleccione equipo...</option>
                           {elevadores.map((e) => (
-                            <option key={e.id_elevador} value={e.id_elevador}>
-                              {e.nombre_cliente} - {e.ubicacion_especifica}
-                            </option>
+                            <option key={e.id_elevador} value={e.id_elevador}>{e.nombre_cliente} - {e.ubicacion_especifica}</option>
                           ))}
                         </select>
                       </div>
-                      <div className="col-12 col-md-6">
-                        <label className="form-label x-small fw-bold text-muted text-uppercase">
-                          Tipo de Falla *
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          required
-                          value={formData.tipo_falla}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              tipo_falla: e.target.value,
-                            })
-                          }
-                        />
+                      <div className="col-md-6">
+                        <label className="form-label small fw-bold text-muted">TIPO DE FALLA</label>
+                        <input className="form-control form-control-lg" required value={formData.tipo_falla} onChange={(e) => setFormData({ ...formData, tipo_falla: e.target.value })} />
                       </div>
-                      <div className="col-6 col-md-3">
-                        <label className="form-label x-small fw-bold text-muted text-uppercase">
-                          Urgencia
-                        </label>
-                        <select
-                          className="form-select"
-                          value={formData.urgencia}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              urgencia: e.target.value,
-                            })
-                          }
-                        >
+                      <div className="col-md-6">
+                        <label className="form-label small fw-bold text-muted">URGENCIA</label>
+                        <select className="form-select" value={formData.urgencia} onChange={(e) => setFormData({ ...formData, urgencia: e.target.value })}>
                           <option value="Baja">Baja</option>
                           <option value="Media">Media</option>
                           <option value="Alta">Alta</option>
                           <option value="Crítica">Crítica</option>
                         </select>
                       </div>
-                      <div className="col-6 col-md-3">
-                        <label className="form-label x-small fw-bold text-muted text-uppercase">
-                          Estatus
-                        </label>
-                        <select
-                          className="form-select"
-                          value={formData.estado_reporte}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              estado_reporte: e.target.value,
-                            })
-                          }
-                        >
+                      <div className="col-md-6">
+                        <label className="form-label small fw-bold text-muted">ESTATUS</label>
+                        <select className="form-select" value={formData.estado_reporte} onChange={(e) => setFormData({ ...formData, estado_reporte: e.target.value })}>
                           <option value="Pendiente">Pendiente</option>
                           <option value="En Proceso">En Proceso</option>
                           <option value="Atendido">Atendido</option>
                         </select>
                       </div>
                       <div className="col-12">
-                        <label className="form-label x-small fw-bold text-muted text-uppercase">
-                          Descripción
-                        </label>
-                        <textarea
-                          className="form-control"
-                          rows="3"
-                          value={formData.descripcion_falla}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              descripcion_falla: e.target.value,
-                            })
-                          }
-                        />
+                        <label className="form-label small fw-bold text-muted">DESCRIPCIÓN DETALLADA</label>
+                        <textarea className="form-control" rows="3" value={formData.descripcion_falla} onChange={(e) => setFormData({ ...formData, descripcion_falla: e.target.value })} />
                       </div>
                     </div>
                   </div>
-                  <div className="modal-footer border-0 bg-light p-2">
-                    <button
-                      type="button"
-                      className="btn btn-link text-muted"
-                      onClick={() => setIsModalOpen(false)}
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="submit"
-                      className="btn btn-danger px-4 shadow-sm"
-                      disabled={loading}
-                    >
-                      {currentFalla ? "Guardar" : "Reportar"}
+                  <div className="modal-footer border-0 pt-0">
+                    <button type="button" className="btn btn-link text-muted text-decoration-none" onClick={() => setIsModalOpen(false)}>Cancelar</button>
+                    <button type="submit" className="btn btn-danger px-4 py-2" disabled={loading}>
+                      {loading ? "Enviando..." : currentFalla ? "Guardar Cambios" : "Crear Reporte"}
                     </button>
                   </div>
                 </form>
@@ -586,8 +349,9 @@ const Fallas = () => {
         )}
 
         <style>{`
-          .x-small { font-size: 0.7rem; }
-          .border-md-0 { border: none !important; }
+          .lift-card { transition: all 0.3s ease; border-radius: 12px; }
+          .lift-card:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(0,0,0,0.08) !important; }
+          .x-small { font-size: 0.75rem; }
         `}</style>
       </div>
     </LayoutPublic>

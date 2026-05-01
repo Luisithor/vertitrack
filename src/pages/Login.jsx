@@ -23,7 +23,7 @@ const Login = () => {
 
     if (token && rol) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      
+
       const rutas = { admin: "/clientes", tecnico: "/mantenimiento" };
       navigate(rutas[rol] || "/");
     }
@@ -32,7 +32,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    
+
     if (!usuario.trim() || !contrasena) {
       setError("Por favor, complete todos los campos");
       return;
@@ -42,23 +42,27 @@ const Login = () => {
       setLoading(true);
       const response = await axios.post(
         "https://vertitrack-backend.onrender.com/api/auth/login",
-        { usuario: usuario.trim(), contrasena }
+        { usuario: usuario.trim(), contrasena },
       );
-      
+
       const { token, rol, id_usuario, nombre } = response.data;
-      
+
       localStorage.setItem("token", token);
       localStorage.setItem("rol", rol);
       localStorage.setItem("id_usuario", id_usuario);
       if (nombre) localStorage.setItem("nombre_usuario", nombre);
-      
+
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      
+
       const rutas = { admin: "/clientes", tecnico: "/mantenimiento" };
       navigate(rutas[rol] || "/");
     } catch (err) {
       console.error("Login error:", err);
-      setError(err.response?.status === 401 ? "Credenciales incorrectas" : "Error de conexión con el servidor");
+      setError(
+        err.response?.status === 401
+          ? "Credenciales incorrectas"
+          : "Error de conexión con el servidor",
+      );
     } finally {
       setLoading(false);
     }
@@ -67,43 +71,71 @@ const Login = () => {
   return (
     <Container fluid className="p-0 login-wrapper">
       <Row className="g-0 min-vh-100">
-        <Col lg={7} className="d-none d-lg-block position-relative overflow-hidden">
+        <Col
+          lg={7}
+          className="d-none d-lg-block position-relative overflow-hidden"
+        >
           <div className="image-side h-100 d-flex align-items-end p-5">
             <div className="overlay-navy"></div>
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }} 
-              animate={{ opacity: 1, y: 0 }} 
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               className="position-relative z-index-10"
             >
-              <div className="tracking-widest text-steel mb-2 uppercase">System Version 2026</div>
-              <h1 className="display-1 brand-font-serif text-white mb-0">Vertitrack</h1>
+              <div className="tracking-widest text-steel mb-2 uppercase">
+                System Version 2026
+              </div>
+              <h1 className="display-1 brand-font-serif text-white mb-0">
+                Vertitrack
+              </h1>
               <div className="philosophy-line-steel">
-                <p className="tracking-widest text-white-50 mb-0">ENGINEERED FOR EVERY LANDSCAPE</p>
+                <p className="tracking-widest text-white-50 mb-0">
+                  ENGINEERED FOR EVERY LANDSCAPE
+                </p>
               </div>
             </motion.div>
           </div>
         </Col>
 
-        <Col lg={5} className="d-flex align-items-center justify-content-center bg-navy-dark">
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            className="form-container p-4 p-xl-5 w-100" 
+        <Col
+          lg={5}
+          className="d-flex align-items-center justify-content-center bg-navy-dark"
+        >
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="form-container p-4 p-xl-5 w-100"
             style={{ maxWidth: "420px" }}
           >
             <div className="text-start mb-5">
-              <div className="ritual-logo-mark-navy"><span>V</span></div>
-              <h2 className="text-white h4 brand-font-serif">Acceso al Sistema</h2>
-              <p className="text-steel-muted x-small uppercase tracking-widest">Autenticación de Terminal</p>
+              <div className="ritual-logo-mark-navy">
+                <span>V</span>
+              </div>
+              <h2 className="text-white h4 brand-font-serif">
+                Acceso al Sistema
+              </h2>
+              <p className="text-steel-muted x-small uppercase tracking-widest">
+                Autenticación de Terminal
+              </p>
             </div>
 
-            {error && <Alert variant="danger" className="custom-alert-navy mb-4">{error}</Alert>}
+            {error && (
+              <Alert variant="danger" className="custom-alert-navy mb-4">
+                {error}
+              </Alert>
+            )}
 
             <Form onSubmit={handleSubmit} className="ritual-form">
               <Form.Group className="mb-4">
-                <Form.Label className="label-technical-navy">IDENTIFICACIÓN / USUARIO</Form.Label>
-                <div className={`custom-input-group-navy ${focusedField === "usuario" ? "focused" : ""}`}>
-                  <span className="input-icon"><Person size={18} /></span>
+                <Form.Label className="label-technical-navy">
+                  IDENTIFICACIÓN / USUARIO
+                </Form.Label>
+                <div
+                  className={`custom-input-group-navy ${focusedField === "usuario" ? "focused" : ""}`}
+                >
+                  <span className="input-icon">
+                    <Person size={18} />
+                  </span>
                   <Form.Control
                     type="text"
                     placeholder="Ingrese su ID técnico"
@@ -118,9 +150,15 @@ const Login = () => {
               </Form.Group>
 
               <Form.Group className="mb-4">
-                <Form.Label className="label-technical-navy">CÓDIGO DE SEGURIDAD</Form.Label>
-                <div className={`custom-input-group-navy ${focusedField === "password" ? "focused" : ""}`}>
-                  <span className="input-icon"><Lock size={18} /></span>
+                <Form.Label className="label-technical-navy">
+                  CÓDIGO DE SEGURIDAD
+                </Form.Label>
+                <div
+                  className={`custom-input-group-navy ${focusedField === "password" ? "focused" : ""}`}
+                >
+                  <span className="input-icon">
+                    <Lock size={18} />
+                  </span>
                   <Form.Control
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
@@ -131,31 +169,51 @@ const Login = () => {
                     disabled={loading}
                     className="input-transparent"
                   />
-                  <button type="button" className="password-toggle-navy" onClick={() => setShowPassword(!showPassword)}>
-                    {showPassword ? <EyeSlash size={18}/> : <Eye size={18}/>}
+                  <button
+                    type="button"
+                    className="password-toggle-navy"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </Form.Group>
 
               <div className="d-flex justify-content-between align-items-center mb-5 mt-2">
-                <Form.Check 
-                  type="checkbox" 
-                  id="remember" 
-                  defaultChecked 
-                  label={<span className="x-small text-steel-muted uppercase">Mantener Conexión</span>} 
+                <Form.Check
+                  type="checkbox"
+                  id="remember"
+                  defaultChecked
+                  label={
+                    <span className="x-small text-steel-muted uppercase">
+                      Mantener Conexión
+                    </span>
+                  }
                   className="custom-check-navy"
                 />
-                <a href="/register" className="x-small text-steel text-decoration-none hover-underline">SOLICITAR ACCESO</a>
+                <a
+                  href="/register"
+                  className="x-small text-steel text-decoration-none hover-underline"
+                >
+                  SOLICITAR ACCESO
+                </a>
               </div>
 
               <motion.button
-                whileHover={{ backgroundColor: "var(--v-blue)", color: "#ffffff" }}
+                whileHover={{
+                  backgroundColor: "var(--v-blue)",
+                  color: "#ffffff",
+                }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 className="btn-v-outline w-100"
                 disabled={loading}
               >
-                {loading ? <Spinner size="sm" animation="border" /> : "INICIAR SESIÓN"}
+                {loading ? (
+                  <Spinner size="sm" animation="border" />
+                ) : (
+                  "INICIAR SESIÓN"
+                )}
               </motion.button>
             </Form>
           </motion.div>
