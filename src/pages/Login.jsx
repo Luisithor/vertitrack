@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Container, Row, Col, Form, Alert, Spinner } from "react-bootstrap";
@@ -17,9 +17,22 @@ const Login = () => {
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const rol = localStorage.getItem("rol");
+
+    if (token && rol) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      
+      const rutas = { admin: "/clientes", tecnico: "/mantenimiento" };
+      navigate(rutas[rol] || "/");
+    }
+  }, [navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    
     if (!usuario.trim() || !contrasena) {
       setError("Por favor, complete todos los campos");
       return;
@@ -31,6 +44,7 @@ const Login = () => {
         "https://vertitrack-backend.onrender.com/api/auth/login",
         { usuario: usuario.trim(), contrasena }
       );
+      
       const { token, rol, id_usuario, nombre } = response.data;
       
       localStorage.setItem("token", token);
@@ -43,7 +57,8 @@ const Login = () => {
       const rutas = { admin: "/clientes", tecnico: "/mantenimiento" };
       navigate(rutas[rol] || "/");
     } catch (err) {
-      setError(err.response?.status === 401 ? "Credenciales incorrectas" : "Error de conexión");
+      console.error("Login error:", err);
+      setError(err.response?.status === 401 ? "Credenciales incorrectas" : "Error de conexión con el servidor");
     } finally {
       setLoading(false);
     }
@@ -52,7 +67,6 @@ const Login = () => {
   return (
     <Container fluid className="p-0 login-wrapper">
       <Row className="g-0 min-vh-100">
-        {/* Panel Izquierdo: Imagen con atmósfera de Ingeniería */}
         <Col lg={7} className="d-none d-lg-block position-relative overflow-hidden">
           <div className="image-side h-100 d-flex align-items-end p-5">
             <div className="overlay-navy"></div>
@@ -70,7 +84,6 @@ const Login = () => {
           </div>
         </Col>
 
-        {/* Panel Derecho: El Ritual de Acceso */}
         <Col lg={5} className="d-flex align-items-center justify-content-center bg-navy-dark">
           <motion.div 
             initial={{ opacity: 0 }} 
@@ -128,6 +141,7 @@ const Login = () => {
                 <Form.Check 
                   type="checkbox" 
                   id="remember" 
+                  defaultChecked 
                   label={<span className="x-small text-steel-muted uppercase">Mantener Conexión</span>} 
                   className="custom-check-navy"
                 />
