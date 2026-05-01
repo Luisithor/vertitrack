@@ -420,9 +420,6 @@ const Fallas = () => {
                           >
                             <Edit size={16} />
                           </button>
-                          <button className="btn btn-sm btn-light text-danger border">
-                            <Trash2 size={16} />
-                          </button>
                         </td>
                       </tr>
                     );
