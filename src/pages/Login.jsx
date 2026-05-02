@@ -1,3 +1,5 @@
+// 🔥 DEBUG añadido sin modificar estructura original
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -10,6 +12,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../static/Login.css";
 
 const Login = () => {
+  console.log("🔥 Login renderizado");
+
   const [usuario, setUsuario] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [error, setError] = useState("");
@@ -22,21 +26,32 @@ const Login = () => {
   const VAPID_KEY = "BF-TBxOz3GpCZW4iczgoDS8j05pcCEGAc80ThHOhzK_EdYKh4SAhMuG9ZMhWzjp0Um386lyfDOL-As6QfWwK6pg";
 
   useEffect(() => {
+    console.log("⚡ useEffect ejecutándose");
+
     const token = localStorage.getItem("token");
     const rol = localStorage.getItem("rol");
+
+    console.log("⚡ token:", token);
+    console.log("⚡ rol:", rol);
 
     if (token && rol) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       const rutas = { admin: "/clientes", tecnico: "/mantenimiento" };
-      navigate(rutas[rol] || "/");
+
+      console.log("⚡ Ya autenticado → redirección automática");
+
+      // 🔴 COMENTADO SOLO PARA DEBUG
+      // navigate(rutas[rol] || "/");
     }
   }, [navigate]);
 
   const handleSubmit = async (e) => {
+    console.log("🟢 CLICK detectado");
     e.preventDefault();
     setError("");
 
     if (!usuario.trim() || !contrasena) {
+      console.warn("⚠️ Campos vacíos");
       setError("Por favor, complete todos los campos");
       return;
     }
@@ -44,10 +59,14 @@ const Login = () => {
     try {
       setLoading(true);
 
+      console.log("📤 Enviando request...", { usuario, contrasena });
+
       const response = await axios.post(
         "https://vertitrack-backend.onrender.com/api/auth/login",
         { usuario: usuario.trim(), contrasena },
       );
+
+      console.log("✅ RESPONSE COMPLETO:", response);
 
       const { token, rol, id_usuario, nombre } = response.data;
       console.log("✅ [1] Login exitoso. id_usuario:", id_usuario, "| rol:", rol);
@@ -60,30 +79,30 @@ const Login = () => {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       console.log("✅ [2] Token JWT seteado en axios headers");
 
-      // --- LÓGICA DE NOTIFICACIONES PUSH ---
       try {
         console.log("🔔 [3] Verificando soporte de Notifications...");
 
         if (!("Notification" in window)) {
-          console.warn("⚠️ [3] Este navegador NO soporta notificaciones");
+          console.warn("⚠️ Este navegador NO soporta notificaciones");
         } else {
-          console.log("🔔 [3] Notification API disponible. Permiso actual:", Notification.permission);
+          console.log("🔔 Permiso actual:", Notification.permission);
 
           const permission = await Notification.requestPermission();
-          console.log("🔔 [4] Resultado del permiso:", permission);
+          console.log("🔔 Resultado del permiso:", permission);
 
           if (permission === "granted") {
             console.log("📱 [5] Solicitando FCM token a Firebase...");
-            console.log("📱 [5] Objeto messaging:", messaging);
-            console.log("📱 [5] VAPID KEY:", VAPID_KEY);
+            console.log("📱 messaging:", messaging);
 
             const fcmToken = await getToken(messaging, { vapidKey: VAPID_KEY });
-            console.log("📱 [6] FCM Token obtenido:", fcmToken ? `${fcmToken.substring(0, 20)}...` : "NULL o vacío");
+
+            console.log(
+              "📱 [6] FCM Token:",
+              fcmToken ? `${fcmToken.substring(0, 20)}...` : "NULL"
+            );
 
             if (fcmToken) {
               console.log("📡 [7] Enviando token al backend...");
-              console.log("📡 [7] Payload:", { id_usuario, token_push: fcmToken.substring(0, 20) + "..." });
-              console.log("📡 [7] Header Authorization presente:", !!axios.defaults.headers.common["Authorization"]);
 
               const putResponse = await axios.put(
                 "https://vertitrack-backend.onrender.com/api/usuarios/actualizar-token",
@@ -92,31 +111,38 @@ const Login = () => {
 
               console.log("✅ [8] Respuesta del backend:", putResponse.status, putResponse.data);
             } else {
-              console.warn("⚠️ [6] FCM Token es null/vacío. Posible problema con el Service Worker o VAPID KEY");
+              console.warn("⚠️ FCM Token vacío");
             }
           } else {
-            console.warn("⚠️ [4] Permiso de notificaciones denegado o descartado:", permission);
+            console.warn("⚠️ Permiso denegado:", permission);
           }
         }
       } catch (pushErr) {
-        console.error("❌ [PUSH ERROR] Tipo:", pushErr?.name);
-        console.error("❌ [PUSH ERROR] Mensaje:", pushErr?.message);
-        console.error("❌ [PUSH ERROR] Stack:", pushErr?.stack);
-        console.error("❌ [PUSH ERROR] Objeto completo:", pushErr);
+        console.error("❌ PUSH ERROR:", pushErr);
       }
-      // -------------------------------------
+
+      console.log("➡️ Antes de navegar", rol);
 
       const rutas = { admin: "/clientes", tecnico: "/mantenimiento" };
-      navigate(rutas[rol] || "/");
+
+      // 🔴 COMENTADO SOLO PARA DEBUG
+      // navigate(rutas[rol] || "/");
+
+      alert("LOGIN COMPLETADO (DEBUG)");
 
     } catch (err) {
-      console.error("Login error:", err);
+      console.error("❌ ERROR COMPLETO:", err);
+      console.error("❌ RESPONSE:", err.response);
+      console.error("❌ DATA:", err.response?.data);
+      console.error("❌ STATUS:", err.response?.status);
+
       setError(
         err.response?.status === 401
           ? "Credenciales incorrectas"
           : "Error de conexión con el servidor",
       );
     } finally {
+      console.log("🔄 Finalizando proceso");
       setLoading(false);
     }
   };
