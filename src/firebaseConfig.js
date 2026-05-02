@@ -2,12 +2,12 @@ import { initializeApp } from "firebase/app";
 import { getMessaging, getToken } from "firebase/messaging";
 
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "vertitrack-f6f00.firebaseapp.com",
-  projectId: "vertitrack-f6f00",
-  storageBucket: "vertitrack-f6f00.firebasestorage.app",
-  messagingSenderId: "TU_MESSAGING_SENDER_ID",
-  appId: "TU_APP_ID"
+    apiKey: "AIzaSyCqOZagQ0aQrt0toSMHOg2La1QKq6b2l-o",
+    authDomain: "vertitrack-f6f00.firebaseapp.com",
+    projectId: "vertitrack-f6f00",
+    storageBucket: "vertitrack-f6f00.firebasestorage.app",
+    messagingSenderId: "406370468247",
+    appId: "1:406370468247:web:d01754c3909ea3ef82c4d2"
 };
 
 const app = initializeApp(firebaseConfig);
