@@ -4,8 +4,8 @@ import axios from "axios";
 import { Container, Row, Col, Form, Alert, Spinner } from "react-bootstrap";
 import { Person, Lock, Eye, EyeSlash } from "react-bootstrap-icons";
 import { motion } from "framer-motion";
-import { getToken } from "firebase/messaging"; // Importación esencial
-import { messaging } from "../firebase"; // Asegúrate de que la ruta a tu config de Firebase sea correcta
+import { getToken } from "firebase/messaging";
+import { messaging } from "../firebase";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../static/Login.css";
 
@@ -19,8 +19,7 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  // Tu VAPID KEY de la consola de Firebase
-  const VAPID_KEY = "BF-TBxOz3GpCZW4iczgoDS8j05pcCEGAc80ThHOhzK_EdYKh4SAhMuG9ZMhWzjp0Um386lyfDOL-As6QfWwK6pg"; 
+  const VAPID_KEY = "BF-TBxOz3GpCZW4iczgoDS8j05pcCEGAc80ThHOhzK_EdYKh4SAhMuG9ZMhWzjp0Um386lyfDOL-As6QfWwK6pg";
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -44,48 +43,69 @@ const Login = () => {
 
     try {
       setLoading(true);
-      // 1. Petición de Login al Backend en Render
+
       const response = await axios.post(
         "https://vertitrack-backend.onrender.com/api/auth/login",
         { usuario: usuario.trim(), contrasena },
       );
 
       const { token, rol, id_usuario, nombre } = response.data;
+      console.log("✅ [1] Login exitoso. id_usuario:", id_usuario, "| rol:", rol);
 
-      // 2. Persistencia de datos local
       localStorage.setItem("token", token);
       localStorage.setItem("rol", rol);
       localStorage.setItem("id_usuario", id_usuario);
       if (nombre) localStorage.setItem("nombre_usuario", nombre);
 
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      console.log("✅ [2] Token JWT seteado en axios headers");
 
       // --- LÓGICA DE NOTIFICACIONES PUSH ---
       try {
-        if ("Notification" in window) {
+        console.log("🔔 [3] Verificando soporte de Notifications...");
+
+        if (!("Notification" in window)) {
+          console.warn("⚠️ [3] Este navegador NO soporta notificaciones");
+        } else {
+          console.log("🔔 [3] Notification API disponible. Permiso actual:", Notification.permission);
+
           const permission = await Notification.requestPermission();
-          
+          console.log("🔔 [4] Resultado del permiso:", permission);
+
           if (permission === "granted") {
-            // Generamos el token de Firebase
+            console.log("📱 [5] Solicitando FCM token a Firebase...");
+            console.log("📱 [5] Objeto messaging:", messaging);
+            console.log("📱 [5] VAPID KEY:", VAPID_KEY);
+
             const fcmToken = await getToken(messaging, { vapidKey: VAPID_KEY });
+            console.log("📱 [6] FCM Token obtenido:", fcmToken ? `${fcmToken.substring(0, 20)}...` : "NULL o vacío");
 
             if (fcmToken) {
-              // Enviamos el token a la tabla "Usuarios" en Neon
-              await axios.put("https://vertitrack-backend.onrender.com/api/usuarios/actualizar-token", {
-                id_usuario,
-                token_push: fcmToken
-              });
-              console.log("✅ Dispositivo vinculado exitosamente");
+              console.log("📡 [7] Enviando token al backend...");
+              console.log("📡 [7] Payload:", { id_usuario, token_push: fcmToken.substring(0, 20) + "..." });
+              console.log("📡 [7] Header Authorization presente:", !!axios.defaults.headers.common["Authorization"]);
+
+              const putResponse = await axios.put(
+                "https://vertitrack-backend.onrender.com/api/usuarios/actualizar-token",
+                { id_usuario, token_push: fcmToken }
+              );
+
+              console.log("✅ [8] Respuesta del backend:", putResponse.status, putResponse.data);
+            } else {
+              console.warn("⚠️ [6] FCM Token es null/vacío. Posible problema con el Service Worker o VAPID KEY");
             }
+          } else {
+            console.warn("⚠️ [4] Permiso de notificaciones denegado o descartado:", permission);
           }
         }
       } catch (pushErr) {
-        // Error silencioso: No bloqueamos el acceso al sistema si falla el Push
-        console.warn("No se pudo registrar el token de notificaciones:", pushErr);
+        console.error("❌ [PUSH ERROR] Tipo:", pushErr?.name);
+        console.error("❌ [PUSH ERROR] Mensaje:", pushErr?.message);
+        console.error("❌ [PUSH ERROR] Stack:", pushErr?.stack);
+        console.error("❌ [PUSH ERROR] Objeto completo:", pushErr);
       }
       // -------------------------------------
 
-      // 3. Redirección final según el Rol
       const rutas = { admin: "/clientes", tecnico: "/mantenimiento" };
       navigate(rutas[rol] || "/");
 
@@ -104,7 +124,6 @@ const Login = () => {
   return (
     <Container fluid className="p-0 login-wrapper">
       <Row className="g-0 min-vh-100">
-        {/* Lado de Imagen (Diseño Ritual & Code) */}
         <Col lg={7} className="d-none d-lg-block position-relative overflow-hidden">
           <div className="image-side h-100 d-flex align-items-end p-5">
             <div className="overlay-navy"></div>
@@ -122,7 +141,6 @@ const Login = () => {
           </div>
         </Col>
 
-        {/* Lado del Formulario */}
         <Col lg={5} className="d-flex align-items-center justify-content-center bg-navy-dark">
           <motion.div
             initial={{ opacity: 0 }}
