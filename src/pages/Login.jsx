@@ -4,6 +4,8 @@ import axios from "axios";
 import { Container, Row, Col, Form, Alert, Spinner } from "react-bootstrap";
 import { Person, Lock, Eye, EyeSlash } from "react-bootstrap-icons";
 import { motion } from "framer-motion";
+import { getToken } from "firebase/messaging"; // Importación esencial
+import { messaging } from "../firebase"; // Asegúrate de que la ruta a tu config de Firebase sea correcta
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../static/Login.css";
 
@@ -17,13 +19,15 @@ const Login = () => {
 
   const navigate = useNavigate();
 
+  // Tu VAPID KEY de la consola de Firebase
+  const VAPID_KEY = "BF-TBxOz3GpCZW4iczgoDS8j05pcCEGAc80ThHOhzK_EdYKh4SAhMuG9ZMhWzjp0Um386lyfDOL-As6QfWwK6pg"; 
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     const rol = localStorage.getItem("rol");
 
     if (token && rol) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
       const rutas = { admin: "/clientes", tecnico: "/mantenimiento" };
       navigate(rutas[rol] || "/");
     }
@@ -40,6 +44,7 @@ const Login = () => {
 
     try {
       setLoading(true);
+      // 1. Petición de Login al Backend en Render
       const response = await axios.post(
         "https://vertitrack-backend.onrender.com/api/auth/login",
         { usuario: usuario.trim(), contrasena },
@@ -47,6 +52,7 @@ const Login = () => {
 
       const { token, rol, id_usuario, nombre } = response.data;
 
+      // 2. Persistencia de datos local
       localStorage.setItem("token", token);
       localStorage.setItem("rol", rol);
       localStorage.setItem("id_usuario", id_usuario);
@@ -54,8 +60,35 @@ const Login = () => {
 
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
+      // --- LÓGICA DE NOTIFICACIONES PUSH ---
+      try {
+        if ("Notification" in window) {
+          const permission = await Notification.requestPermission();
+          
+          if (permission === "granted") {
+            // Generamos el token de Firebase
+            const fcmToken = await getToken(messaging, { vapidKey: VAPID_KEY });
+
+            if (fcmToken) {
+              // Enviamos el token a la tabla "Usuarios" en Neon
+              await axios.put("https://vertitrack-backend.onrender.com/api/usuarios/actualizar-token", {
+                id_usuario,
+                token_push: fcmToken
+              });
+              console.log("✅ Dispositivo vinculado exitosamente");
+            }
+          }
+        }
+      } catch (pushErr) {
+        // Error silencioso: No bloqueamos el acceso al sistema si falla el Push
+        console.warn("No se pudo registrar el token de notificaciones:", pushErr);
+      }
+      // -------------------------------------
+
+      // 3. Redirección final según el Rol
       const rutas = { admin: "/clientes", tecnico: "/mantenimiento" };
       navigate(rutas[rol] || "/");
+
     } catch (err) {
       console.error("Login error:", err);
       setError(
@@ -71,10 +104,8 @@ const Login = () => {
   return (
     <Container fluid className="p-0 login-wrapper">
       <Row className="g-0 min-vh-100">
-        <Col
-          lg={7}
-          className="d-none d-lg-block position-relative overflow-hidden"
-        >
+        {/* Lado de Imagen (Diseño Ritual & Code) */}
+        <Col lg={7} className="d-none d-lg-block position-relative overflow-hidden">
           <div className="image-side h-100 d-flex align-items-end p-5">
             <div className="overlay-navy"></div>
             <motion.div
@@ -82,25 +113,17 @@ const Login = () => {
               animate={{ opacity: 1, y: 0 }}
               className="position-relative z-index-10"
             >
-              <div className="tracking-widest text-steel mb-2 uppercase">
-                System Version 2026
-              </div>
-              <h1 className="display-1 brand-font-serif text-white mb-0">
-                Vertitrack
-              </h1>
+              <div className="tracking-widest text-steel mb-2 uppercase">System Version 2026</div>
+              <h1 className="display-1 brand-font-serif text-white mb-0">Vertitrack</h1>
               <div className="philosophy-line-steel">
-                <p className="tracking-widest text-white-50 mb-0">
-                  ENGINEERED FOR EVERY LANDSCAPE
-                </p>
+                <p className="tracking-widest text-white-50 mb-0">ENGINEERED FOR EVERY LANDSCAPE</p>
               </div>
             </motion.div>
           </div>
         </Col>
 
-        <Col
-          lg={5}
-          className="d-flex align-items-center justify-content-center bg-navy-dark"
-        >
+        {/* Lado del Formulario */}
+        <Col lg={5} className="d-flex align-items-center justify-content-center bg-navy-dark">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -108,34 +131,18 @@ const Login = () => {
             style={{ maxWidth: "420px" }}
           >
             <div className="text-start mb-5">
-              <div className="ritual-logo-mark-navy">
-                <span>V</span>
-              </div>
-              <h2 className="text-white h4 brand-font-serif">
-                Acceso al Sistema
-              </h2>
-              <p className="text-steel-muted x-small uppercase tracking-widest">
-                Autenticación de Terminal
-              </p>
+              <div className="ritual-logo-mark-navy"><span>V</span></div>
+              <h2 className="text-white h4 brand-font-serif">Acceso al Sistema</h2>
+              <p className="text-steel-muted x-small uppercase tracking-widest">Autenticación de Terminal</p>
             </div>
 
-            {error && (
-              <Alert variant="danger" className="custom-alert-navy mb-4">
-                {error}
-              </Alert>
-            )}
+            {error && <Alert variant="danger" className="custom-alert-navy mb-4">{error}</Alert>}
 
             <Form onSubmit={handleSubmit} className="ritual-form">
               <Form.Group className="mb-4">
-                <Form.Label className="label-technical-navy">
-                  IDENTIFICACIÓN / USUARIO
-                </Form.Label>
-                <div
-                  className={`custom-input-group-navy ${focusedField === "usuario" ? "focused" : ""}`}
-                >
-                  <span className="input-icon">
-                    <Person size={18} />
-                  </span>
+                <Form.Label className="label-technical-navy">IDENTIFICACIÓN / USUARIO</Form.Label>
+                <div className={`custom-input-group-navy ${focusedField === "usuario" ? "focused" : ""}`}>
+                  <span className="input-icon"><Person size={18} /></span>
                   <Form.Control
                     type="text"
                     placeholder="Ingrese su ID técnico"
@@ -150,15 +157,9 @@ const Login = () => {
               </Form.Group>
 
               <Form.Group className="mb-4">
-                <Form.Label className="label-technical-navy">
-                  CÓDIGO DE SEGURIDAD
-                </Form.Label>
-                <div
-                  className={`custom-input-group-navy ${focusedField === "password" ? "focused" : ""}`}
-                >
-                  <span className="input-icon">
-                    <Lock size={18} />
-                  </span>
+                <Form.Label className="label-technical-navy">CÓDIGO DE SEGURIDAD</Form.Label>
+                <div className={`custom-input-group-navy ${focusedField === "password" ? "focused" : ""}`}>
+                  <span className="input-icon"><Lock size={18} /></span>
                   <Form.Control
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
@@ -184,36 +185,20 @@ const Login = () => {
                   type="checkbox"
                   id="remember"
                   defaultChecked
-                  label={
-                    <span className="x-small text-steel-muted uppercase">
-                      Mantener Conexión
-                    </span>
-                  }
+                  label={<span className="x-small text-steel-muted uppercase">Mantener Conexión</span>}
                   className="custom-check-navy"
                 />
-                <a
-                  href="/register"
-                  className="x-small text-steel text-decoration-none hover-underline"
-                >
-                  SOLICITAR ACCESO
-                </a>
+                <a href="/register" className="x-small text-steel text-decoration-none hover-underline">SOLICITAR ACCESO</a>
               </div>
 
               <motion.button
-                whileHover={{
-                  backgroundColor: "var(--v-blue)",
-                  color: "#ffffff",
-                }}
+                whileHover={{ backgroundColor: "var(--v-blue)", color: "#ffffff" }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 className="btn-v-outline w-100"
                 disabled={loading}
               >
-                {loading ? (
-                  <Spinner size="sm" animation="border" />
-                ) : (
-                  "INICIAR SESIÓN"
-                )}
+                {loading ? <Spinner size="sm" animation="border" /> : "INICIAR SESIÓN"}
               </motion.button>
             </Form>
           </motion.div>
